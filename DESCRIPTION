@@ -5,8 +5,8 @@ Version: 0.9.0
 Authors@R: person("Rupert", "Overall", email = "rtrack@rupertoverall.net",
   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3882-6073"))
 Maintainer: Rupert Overall <rtrack@rupertoverall.net>
-URL: http://rupertoverall.net/rtrack/
-BugReports: https://github.com/rupertoverall/rtrack/issues
+URL: http://rupertoverall.net/Rtrack/, https://github.com/rupertoverall/Rtrack
+BugReports: https://github.com/rupertoverall/Rtrack/issues
 Description: A toolkit for the analysis of paths from spatial tracking experiments (such as the Morris water maze) and calculation of goal-finding strategies. 
     This package is centered on an approach using machine learning for path classification.
 License: GPL-3
