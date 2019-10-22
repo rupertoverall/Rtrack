@@ -23,6 +23,7 @@
 #' @seealso \code{\link{read_experiment}} to import the JSON file back into R.
 #'
 #' @examples
+#' \dontrun{
 #' require(Rtrack)
 #' experiment.description <- system.file("extdata", "Minimal_experiment.xlsx",
 #'   package = "Rtrack")
@@ -34,6 +35,7 @@
 #' # Experiments are identical except for export timestamp/notes
 #' all.equal(experiment, imported.experiment)
 #' identical(experiment$metrics, imported.experiment$metrics)
+#' }
 #'
 #' @importFrom rjson toJSON
 #'
