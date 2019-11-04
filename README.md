@@ -21,10 +21,12 @@ dependencies = c("crayon", "graphics", "grDevices", "KernSmooth", "methods", "op
 install.packages(dependencies[!dependencies %in% installed.packages()]) 
 ```
 
+\* If you encounter problems, please look at the [installation notes](http://rupertoverall.net/Rtrack/articles/Rtrack_install_page.html).
+
 Then install the package directly from the [package website](http://rupertoverall.net/Rtrack):
 
 ``` r
-install.packages("http://rupertoverall.net/Rtrack/Rtrack_0.9.0.tar.gz", repos = NULL)
+install.packages("http://rupertoverall.net/Rtrack/Rtrack_0.9.3.tar.gz", repos = NULL)
 ```
 
 Getting started
