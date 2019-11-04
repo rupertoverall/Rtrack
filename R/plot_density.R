@@ -99,8 +99,8 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 		density.map = KernSmooth::bkde2D(raster::raster(cbind(plot.path$x, plot.path$y)), range.x = as.list(as.data.frame(t(pool.bounding.box))), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 		density.raster = raster::raster(list(x = density.map$x1, y = density.map$x2, z = density.map$fhat))
 		density.raster = raster::mask(density.raster, plot.pool)
-		.parprevious = graphics::par(no.readonly = TRUE)
-		graphics::par(mar = margins, xpd = TRUE)
+		.parprevious = graphics::par(mar = margins, xpd = TRUE)
+		on.exit(par(.parprevious))
 		sp::plot(plot.pool)
 		graphics::rasterImage(raster::as.raster(density.raster, col = col), -1, -1, 1, 1)
 		#sp::plot(plot.pool, col = "#FFFFFF00", border = goal.col, add = T, ...)
@@ -118,7 +118,6 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			graphics::rect(pool.bounding.box["x", "max"] + width, pool.bounding.box["y", "max"], pool.bounding.box["x", "max"] + 2 * width, 0, ...)
 		}
 		title(main = title)
-		graphics::par(mar = .parprevious$mar, xpd = .parprevious$xpd)
 		invisible(density.raster)
 	}else{
 		stop("The argument supplied is not an 'rtrack_metrics' object. Did you produce this using 'calculate_metrics' or 'read_experiment'?")

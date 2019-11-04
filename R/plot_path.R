@@ -50,11 +50,11 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight.interpo
 	if(class(metrics) == 'rtrack_metrics'){
 		if(is.null(title)){title = metrics$id}
 		if(is.null(title)){title = ""} # Empty title string in case using metrics$id failed
-		.parprevious = graphics::par(no.readonly = TRUE)
 		parameters = c(...)
 		path.lwd = as.numeric(parameters[which(names(parameters) == "lwd")])
 		if(length(path.lwd) == 0 ) path.lwd = 2
-		graphics::par(mar = margins)
+		.parprevious = graphics::par(mar = margins)
+		on.exit(par(.parprevious))
 		sp::plot(metrics$arena$zones$pool, lwd = (path.lwd / 2), main = title)
 		sp::plot(metrics$arena$zones$wall, lwd = path.lwd, col = "#C0E0FFFF", add = T, border = NA)
 		sp::plot(metrics$arena$zones$far.wall, lwd = path.lwd, col = "#C0E0FFA0", add = T, border = NA)
@@ -78,7 +78,6 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight.interpo
 		}
 		graphics::segments(metrics$path$x[1], metrics$path$y[1], metrics$arena$goal$x, metrics$arena$goal$y, lty = 3, lwd = path.lwd, col = "#F0A020F0")
 		sp::plot(metrics$arena$zones$pool, lwd = path.lwd, add = T)
-		graphics::par(mar = .parprevious$mar)
 		invisible()
 	}else{
 		stop("The argument supplied is not an 'rtrack_metrics' object. Did you produce this using 'calculate_metrics' or 'read_experiment'?")

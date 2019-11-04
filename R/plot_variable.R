@@ -109,9 +109,9 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	global.y.se = by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), sd, na.rm = T) / sqrt(by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), length))
 	plot.min = min(global.y.mean - global.y.se, na.rm = T)
 	plot.max = max(global.y.mean + global.y.se, na.rm = T)
-	.parprevious = graphics::par(no.readonly = TRUE)
 	if(legend){
-		graphics::par(mar = margins, xpd = TRUE)
+		.parprevious = graphics::par(mar = margins, xpd = TRUE)
+		on.exit(par(.parprevious))
 		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2))) ))
 	}else{
 		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2))) ))
@@ -173,6 +173,5 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 
 	if(legend) legend(max(plotting.data$x), plot.max, legend = names(factor.colours), fill = factor.colours, cex = .7, bty = "n", border = NA)
 
-	graphics::par(.parprevious)
 	invisible(factor.colours)
 }

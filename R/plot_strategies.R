@@ -111,8 +111,6 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			screen.layout = t(sapply(1:n, function(m){ c(0, 1, m / n - 1 / n, m / n) }))
 			screens = graphics::split.screen(screen.layout)
 		}
-		.parprevious = graphics::par(no.readonly = TRUE)
-	
 		plot.values = sapply(1:length(names(plot.series)), function(i){
 			level = names(plot.series)[i]
 			group = plotting.data[plot.series[[level]], ]
@@ -126,7 +124,8 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			plot.colours = strategies$strategy.colours[strategies$plot.order]
 			
 			if(screen) graphics::screen(screens[i])
-			graphics::par(mar = margins, xpd = TRUE)
+			.parprevious = graphics::par(mar = margins, xpd = TRUE)
+			on.exit(par(.parprevious))
 
 			plot(x, seq(0, max(y.cum), length.out = length(x)), type = "n", las = 1, xaxt = "n", xaxs="i", yaxs="i", ylab = "Strategy usage", xlab = "Day")
 			for(n in 1:ncol(y.cum)){
@@ -151,7 +150,6 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 		return(NULL)
 		})
 		graphics::close.screen(screens)
-		graphics::par(.parprevious)
 	}
 	invisible()
 }
