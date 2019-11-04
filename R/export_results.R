@@ -37,6 +37,8 @@
 #'   package = "Rtrack")
 #' experiment <- read_experiment(experiment.description, format = "excel",
 #'   project.dir = system.file("extdata", "", package = "Rtrack"))
+#' # The code below returns a data.frame. 
+#' # Use the parameter 'file' to write to a file instead.
 #' export_results(experiment)
 #'
 #' @importFrom utils write.csv write.csv2 write.table packageVersion

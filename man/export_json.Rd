@@ -38,9 +38,9 @@ experiment.description <- system.file("extdata", "Minimal_experiment.xlsx",
   package = "Rtrack")
 experiment <- read_experiment(experiment.description, format = "excel",
   project.dir = system.file("extdata", "", package = "Rtrack"))
-export_json(experiment, file = "Minimal_experiment.json")
-imported.experiment <- read_experiment("Minimal_experiment.json",
-  format = "json")
+tempfile <- file.path(tempdir(), "Minimal_experiment.json") # Temporary file
+export_json(experiment, file = tempfile)
+imported.experiment <- read_experiment(tempfile, format = "json")
 # Experiments are identical except for export timestamp/notes
 all.equal(experiment, imported.experiment)
 identical(experiment$metrics, imported.experiment$metrics)
