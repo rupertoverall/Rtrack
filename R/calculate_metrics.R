@@ -130,7 +130,6 @@ calculate_metrics = function(path, arena) {
 	# Roaming entropy
 	gridsize = 50
 	freq = KernSmooth::bkde2D(raster::raster(cbind(path$x, path$y)), range.x = as.list(as.data.frame(t(arena$zones$pool@bbox))), bandwidth = c(1 / gridsize, 1 / gridsize), gridsize = c(gridsize, gridsize))$fhat
-	gridMap = matrix.map(1:(gridsize ^ 2), dim(freq))
 	sequence = seq(-1, 1, length.out = gridsize + 2)[-c(1, gridsize + 2)]
 	outsideArena = is.na(sp::over(sp::SpatialPoints(data.frame(x = rep(sequence, times = gridsize), y = rep(sequence, each = gridsize))), arena$zones$pool))
 	sum = sum(freq, na.rm = T)
