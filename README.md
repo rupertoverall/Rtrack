@@ -12,22 +12,14 @@ The export of raw data in a standardised format allows complete experiments to b
 Install
 -----------------------------------------------------------------------------------------------------------
 
-The package is available from the [package website](http://rupertoverall.net/Rtrack). To install this, run the following lines in [R](https://www.r-project.org/).
-
-First, install any necessary dependencies:
+The package is available from the [CRAN repository](https://cran.r-project.org/web/packages/Rtrack/index.html). To install it, run the following lines in [R](https://www.r-project.org/).
 
 ``` r
-dependencies = c("crayon", "graphics", "grDevices", "KernSmooth", "methods", "openxlsx", "parallel", "pbapply", "randomForest", "raster", "readxl", "rgeos", "rjson", "snow", "sp", "stats", "tools", "utils")
-install.packages(dependencies[!dependencies %in% installed.packages()]) 
+install.packages("Rtrack") 
 ```
 
 \* If you encounter problems, please look at the [installation notes](http://rupertoverall.net/Rtrack/articles/Rtrack_install_page.html).
 
-Then install the package directly from the [package website](http://rupertoverall.net/Rtrack):
-
-``` r
-install.packages("http://rupertoverall.net/Rtrack/Rtrack_0.9.3.tar.gz", repos = NULL)
-```
 
 Getting started
 ----------------------------------------------------------------------------------------------------------------
