@@ -33,7 +33,7 @@
 #' @export
 call_strategy = function(metrics, version = "mouse_rf_6") {
 	if(!(class(metrics) == "rtrack_metrics") & !(class(metrics) == "list" & class(metrics[[1]]) == "rtrack_metrics")){
-		stop("This function requires a 'rtrack_metrics' object or a list of 'rtrack_metrics' objects. Did you create this with 'calculate_metrics' or 'read.mwm.experiment'?")
+		stop("This function requires an 'rtrack_metrics' object or a list of 'rtrack_metrics' objects. Did you create this with 'calculate_metrics' or 'read_experiment'?")
 	}else{
 		strategy.names = c(
 			"1" = "thigmotaxis",
@@ -67,28 +67,31 @@ call_strategy = function(metrics, version = "mouse_rf_6") {
 		# Replace missing data (where either goal not reached, or no goal or old goal present) by suitable values
 		summary.metrics$latency.to.goal[is.na(summary.metrics$latency.to.goal)] = 1 # Maximum latency = 1
 		summary.metrics$sd.d.goal[is.na(summary.metrics$sd.d.goal)] = 0 
-		summary.metrics$mean.d.goal[is.na(summary.metrics$mean.d.goal)] = 2 # Diameter of arena
-		summary.metrics$centroid.goal.displacement[is.na(summary.metrics$centroid.goal.displacement)] = 2 # Diameter of arena
-		summary.metrics$initial.trajectory.error[is.na(summary.metrics$initial.heading.error)] = 2 # Diameter of arena
+		summary.metrics$mean.d.goal[is.na(summary.metrics$mean.d.goal)] = arena.limit # Diameter of arena
+		summary.metrics$centroid.goal.displacement[is.na(summary.metrics$centroid.goal.displacement)] = arena.limit # Diameter of arena
+		summary.metrics$initial.trajectory.error[is.na(summary.metrics$initial.heading.error)] = arena.limit # Diameter of arena
 		summary.metrics$sd.d.old.goal[is.na(summary.metrics$sd.d.old.goal)] = 0
-		summary.metrics$mean.d.old.goal[is.na(summary.metrics$mean.d.old.goal)] = 2 # Diameter of arena
-		summary.metrics$centroid.old.goal.displacement[is.na(summary.metrics$centroid.old.goal.displacement)] = 2 # Diameter of arena
-		summary.metrics$initial.reversal.error[is.na(summary.metrics$initial.reversal.error)] = 2 # Diameter of arena
+		summary.metrics$mean.d.old.goal[is.na(summary.metrics$mean.d.old.goal)] = arena.limit # Diameter of arena
+		summary.metrics$centroid.old.goal.displacement[is.na(summary.metrics$centroid.old.goal.displacement)] = arena.limit # Diameter of arena
+		summary.metrics$initial.reversal.error[is.na(summary.metrics$initial.reversal.error)] = arena.limit # Diameter of arena
 		loadNamespace("randomForest")
 		# Malformed track metrics are called as NA
 		scores = matrix(NA, nrow = nrow(summary.metrics), ncol = length(strategy.names), dimnames = list(rownames(summary.metrics), names(strategy.names)))
 		use = which(!is.na(rowSums(summary.metrics)))
-		scores[use, ] = stats::predict(rtrack_model, summary.metrics[use, ], type = "prob")
-		scores[summary.metrics$mean.d.old.goal == arena.limit * 2, 8] = 0 # Cannot be perseverence if no old goal
-		predicted.calls = apply(scores, 1, function(row) order(row, decreasing = T)[1] )
-		# Note that a static path (with NA metrics) is called as thigmotaxis with confidence of 0
-		matrix.unmap = function (row, col, dim.m){ outofbounds = col < 1 | col > dim.m[2] | row < 1 | row > dim.m[1]; n = ((col - 1) * dim.m[1]) + row; n[outofbounds] = NA; return(n) }
-		confidence = scores[matrix.unmap(1:nrow(scores), predicted.calls, dim(scores))]
-		confidence[is.na(confidence)] = 0
-		calls = as.data.frame(cbind("strategy" = predicted.calls, "name" = strategy.names[predicted.calls], "confidence" = confidence), stringsAsFactors = FALSE)
-		calls$confidence = as.numeric(calls$confidence)
-		colnames(scores) = strategy.names[colnames(scores)]
-		calls = cbind(calls, as.data.frame(scores[use, , drop = FALSE], stringsAsFactors = FALSE))
+		calls = as.data.frame(cbind("strategy" = rep(NA, nrow(summary.metrics)), "name" = rep(NA, nrow(summary.metrics)), "confidence" = 0, scores), stringsAsFactors = FALSE)
+		if(length(use) > 0){
+			scores[use, ] = stats::predict(rtrack_model, summary.metrics[use, ], type = "prob")
+			scores[summary.metrics$mean.d.old.goal == arena.limit, 9] = 0 # Cannot be perseverence if no old goal
+			predicted.calls = apply(scores, 1, function(row) order(row, decreasing = T)[1] )
+			# Note that a static path (with NA metrics) is called as thigmotaxis with confidence of 0
+			matrix.unmap = function (row, col, dim.m){ outofbounds = col < 1 | col > dim.m[2] | row < 1 | row > dim.m[1]; n = ((col - 1) * dim.m[1]) + row; n[outofbounds] = NA; return(n) }
+			confidence = scores[matrix.unmap(1:nrow(scores), predicted.calls, dim(scores))]
+			confidence[is.na(confidence)] = 0
+			calls$strategy[use] = predicted.calls[use]
+			calls$name[use] = strategy.names[predicted.calls][use]
+			calls$confidence[use] = as.numeric(confidence)[use]
+			calls[use, as.character(1:9)] = scores[use, ]
+		}
 		strategies = list(
 			method = "rtrack",
 			version = version,
