@@ -176,16 +176,36 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			path$raw.t = suppressWarnings(as.numeric(strptime(coordinate.data[ ,3], "%m-%d-%Y %H:%M:%S"))) - suppressWarnings(as.numeric(strptime(coordinate.data[1 ,3], "%m-%d-%Y %H:%M:%S")))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,2]))
-		}else if(track.format=="raw.csv"){
+		}else if(track.format == "raw.csv"){
 			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
-		}else if(track.format=="raw.tab"){
+		}else if(track.format == "raw.csv2"){
+			coordinate.data = utils::read.csv2(filename, header = T, stringsAsFactors = FALSE)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
+		}else if(track.format == "raw.tab"){
 			coordinate.data = utils::read.delim(filename, header = T, stringsAsFactors = FALSE)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x =suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
+		}else if(track.format == "raw.nh.csv"){
+			coordinate.data = utils::read.csv(filename, header = F, stringsAsFactors = FALSE)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
+		}else if(track.format == "raw.nh.csv2"){
+			coordinate.data = utils::read.csv2(filename, header = F, stringsAsFactors = FALSE)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
+		}else if(track.format == "raw.nh.tab"){
+			coordinate.data = utils::read.delim(filename, header = F, stringsAsFactors = FALSE)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
 		}else{
 			stop(paste0("The specified path file format '", track.format, "' is not supported."))
 		}
@@ -220,6 +240,10 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 	}else{
 		warning(paste0("File '", filename, "' does not exist. Skipping this track."), call. = FALSE)
 	}
-	class(path) = "rtrack_path"
-	return(path)
+	if(length(path$t) == 0 & length(path$t) == 0 & length(path$t) == 0){
+		warning(paste0("No valid path data was extracted from the file '", basename(filename), "'. There may be a problem with the track file or the track may just be empty.")) 
+	}else{
+		class(path) = "rtrack_path"
+		return(path)
+	}
 }
