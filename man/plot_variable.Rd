@@ -4,9 +4,17 @@
 \alias{plot_variable}
 \title{Plot path metrics.}
 \usage{
-plot_variable(variable, experiment, factor = NA,
-  factor.colours = "auto", exclude.probe = FALSE, boundaries = NA,
-  legend = TRUE, margins = c(5, 4, 4, 8), ...)
+plot_variable(
+  variable,
+  experiment,
+  factor = NA,
+  factor.colours = "auto",
+  exclude.probe = FALSE,
+  boundaries = NA,
+  legend = TRUE,
+  margins = c(5, 4, 4, 8),
+  ...
+)
 }
 \arguments{
 \item{variable}{The variable/metric that should be plotted. See Details for
@@ -60,6 +68,7 @@ The \code{variable} parameter can either be specified as the name of one of
 the summary metrics, the name of one of the columns from the experiment
 description, or as a numeric vector. In the latter case, the numeric vector
 must be the same length as the number of tracks in the experiment.
+
 
 Boundaries are drawn (as broken vertical lines) between different arena types
 (for example between acquisition and goal reversal phases of a Morris water

@@ -4,8 +4,14 @@
 \alias{read_path}
 \title{Read path coordinates from raw data formats.}
 \usage{
-read_path(filename, arena, id = NULL, track.format = "none",
-  track.index = NULL, interpolate = FALSE)
+read_path(
+  filename,
+  arena,
+  id = NULL,
+  track.format = "none",
+  track.index = NULL,
+  interpolate = FALSE
+)
 }
 \arguments{
 \item{filename}{A raw data file containing path coordinates. See details for

@@ -4,9 +4,15 @@
 \alias{plot_path}
 \title{Plot a path.}
 \usage{
-plot_path(metrics, title = NULL, quadrants = FALSE,
-  highlight.interpolated = TRUE, highlight.initial = TRUE,
-  margins = c(0, 2, 4, 2), ...)
+plot_path(
+  metrics,
+  title = NULL,
+  quadrants = FALSE,
+  highlight.interpolated = TRUE,
+  highlight.initial = TRUE,
+  margins = c(0, 2, 4, 2),
+  ...
+)
 }
 \arguments{
 \item{metrics}{A \code{metrics} object from \code{\link{calculate_metrics}}.}

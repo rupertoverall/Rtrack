@@ -4,9 +4,16 @@
 \alias{check_experiment}
 \title{Check experiment data.}
 \usage{
-check_experiment(filename, format = NA, interpolate = FALSE,
-  project.dir = NA, data.dir = project.dir, cluster = NULL,
-  author.note = "", verbose = FALSE)
+check_experiment(
+  filename,
+  format = NA,
+  interpolate = FALSE,
+  project.dir = NA,
+  data.dir = project.dir,
+  cluster = NULL,
+  author.note = "",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{filename}{A spreadsheet file containing a description of the experiment

@@ -4,9 +4,17 @@
 \alias{plot_strategies}
 \title{Plot water maze strategies.}
 \usage{
-plot_strategies(strategies, experiment, factor = NA,
-  exclude.probe = FALSE, boundaries = NA, legend = TRUE,
-  screen = FALSE, margins = c(5, 4, 4, 8), ...)
+plot_strategies(
+  strategies,
+  experiment,
+  factor = NA,
+  exclude.probe = FALSE,
+  boundaries = NA,
+  legend = TRUE,
+  screen = FALSE,
+  margins = c(5, 4, 4, 8),
+  ...
+)
 }
 \arguments{
 \item{strategies}{The strategy calls as returned from

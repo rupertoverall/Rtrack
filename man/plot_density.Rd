@@ -4,10 +4,17 @@
 \alias{plot_density}
 \title{Plot a path density map.}
 \usage{
-plot_density(metrics, title = NULL,
-  col = (grDevices::colorRampPalette(c("#FCFBFD", "#9E9AC8",
-  "#3F007D")))(256), legend = TRUE, goal.col = "black", goal.lwd = 2,
-  resolution = 600, margins = c(0, 2, 4, 2), ...)
+plot_density(
+  metrics,
+  title = NULL,
+  col = (grDevices::colorRampPalette(c("#FCFBFD", "#9E9AC8", "#3F007D")))(256),
+  legend = TRUE,
+  goal.col = "black",
+  goal.lwd = 2,
+  resolution = 600,
+  margins = c(0, 2, 4, 2),
+  ...
+)
 }
 \arguments{
 \item{metrics}{An \code{rtrack_metrics} object from \code{\link{calculate_metrics}}.}

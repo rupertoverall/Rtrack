@@ -3,7 +3,6 @@
 \docType{package}
 \name{Rtrack}
 \alias{Rtrack}
-\alias{Rtrack-package}
 \title{Analysis of spatial tracking data and strategy classification.}
 \description{
 Analysis of spatial tracking data and strategy classification.

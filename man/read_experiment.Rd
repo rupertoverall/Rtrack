@@ -4,9 +4,16 @@
 \alias{read_experiment}
 \title{Read experiment data.}
 \usage{
-read_experiment(filename, format = NA, interpolate = FALSE,
-  project.dir = NA, data.dir = project.dir, cluster = NULL,
-  author.note = "", verbose = FALSE)
+read_experiment(
+  filename,
+  format = NA,
+  interpolate = FALSE,
+  project.dir = NA,
+  data.dir = project.dir,
+  cluster = NULL,
+  author.note = "",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{filename}{A spreadsheet file containing a description of the experiment
