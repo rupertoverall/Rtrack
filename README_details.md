@@ -2,6 +2,7 @@
 ## Operating system
 This package runs on any operating system with R (≥ version 2.10) installed. The package has been tested on the following systems:
 (Last updated on 2020-02-04 14:47:51 CET).
+
 |Flavor|Version|Tinstall|Tcheck|Ttotal|Status|Flags|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 |r-devel-linux-x86_64-debian-clang |0.9.6 |21.30 |93.51 |114.81 |OK |
