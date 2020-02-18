@@ -66,7 +66,7 @@ export_results = function(experiment, tracks = "all", file = NULL){
 	strategies = Rtrack::call_strategy(experiment$metrics[tracks.subset])$calls
 	strategy.caller = paste(Rtrack::call_strategy(experiment$metrics[tracks.subset])$method, Rtrack::call_strategy(experiment$metrics[tracks.subset])$version, sep = "_")
 	summary.metrics = as.data.frame(do.call("rbind", lapply(experiment$metrics, "[[", "unscaled.summary")), stringsAsFactors = FALSE)[tracks.subset, ]
-	export.note = paste0("Results exported on ", date(), " by Rtrack (version ", paste0("Rtrack version ", utils::packageVersion("Rtrack")), ") <http://rupertoverall.net/Rtrack>.")
+	export.note = paste0("Results exported on ", date(), " by Rtrack (version ", paste0("Rtrack version ", utils::packageVersion("Rtrack")), ") <https://rupertoverall.net/Rtrack>.")
 	result = cbind(Track_ID = rownames(factors), factors, strategies, summary.metrics)
 	
 	if(!is.null(file)){
