@@ -6,7 +6,7 @@
 #' supported, but it might not be clear which format code corresponds to your data. This
 #' function can be run on a typical file to try to guess your file format. If the format
 #' is not recognised, please visit the help page at
-#' \url{http://rupertoverall.net/Rtrack/help.html} where it is also possible to request
+#' \url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to request
 #' support for new formats.
 #'
 #' @param filename A raw data file containing path coordinates. If this is NULL or
@@ -18,6 +18,9 @@
 #'   \code{\link{read_experiment}}.
 #'
 #'   If the track format cannot be determined, \code{NA} is returned.
+#'
+#'   When run without a \code{filename} parameter, a character vector containing all
+#'   supported format codes is invisibly returned.
 #'
 #' @seealso \code{\link{read_path}}, or \code{\link{read_experiment}} to read the track
 #'   files.
@@ -35,19 +38,21 @@ identify_track_format = function(filename = NULL) {
 	track.format = NA
 	encoding = "UTF-8" # Default = UTF-8
 	if(length(filename) == 0){
-		message(paste(c("Supported formats are:",
-		"   raw.csv",
-		"   raw.csv2",
-		"   raw.tab",
-		"   raw.nh.csv",
-		"   raw.nh.csv2",
-		"   raw.nh.tab",
-		"   ethovision.xt.excel",
-		"   ethovision.xt.csv",
-		"   ethovision.xt.csv2",
-		"   ethovision.3.csv",
-		"   actimetrics.watermaze.csv",
-		"   dsnt.wmdat"), collapse = "\n"))
+		supported.formats = c(
+		"raw.csv",
+		"raw.csv2",
+		"raw.tab",
+		"raw.nh.csv",
+		"raw.nh.csv2",
+		"raw.nh.tab",
+		"ethovision.xt.excel",
+		"ethovision.xt.csv",
+		"ethovision.xt.csv2",
+		"ethovision.3.csv",
+		"actimetrics.watermaze.csv",
+		"dsnt.wmdat")
+		message(paste(c("Supported formats are:", paste0("   ", supported.formats)), collapse = "\n"))
+		invisible(supported.formats)
 	}else{
 		# Don't rely on the file extension - it might be wrong.
 		# Test for each format agnostically
@@ -99,12 +104,12 @@ identify_track_format = function(filename = NULL) {
 				# Has tabular data that is tab-separated (with or without headers)
 				# Is this a headerless table of numeric data?
 				raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
-				numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+				numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 				if(ncol(raw) >= 3 & numtest.all){
 					track.format = "raw.nh.tab"
 				}else{
 					raw = utils::read.delim(filename, header = T, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
-					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 					if(ncol(raw) >= 3 & numtest.all){
 						track.format = "raw.tab"
 					}
@@ -118,13 +123,13 @@ identify_track_format = function(filename = NULL) {
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv2(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
-					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 					if(numtest.all){
 						track.format = "raw.nh.csv"
 					}else{
 						raw = utils::read.csv2(filename, header = T, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
-						numtest.all = all(apply(raw, 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
-						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+						numtest.all = all(apply(raw, 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
+						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 						if(ncol(raw) == 3 & numtest.all){
 							track.format = "raw.csv2"
 						}else if(ncol(raw) %% 3 == 0 & numtest.sans){
@@ -141,13 +146,13 @@ identify_track_format = function(filename = NULL) {
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
-					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 					if(numtest.all){
 						track.format = "raw.nh.csv"
 					}else{
 						raw = utils::read.csv(filename, header = T, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
-						numtest.all = all(apply(raw, 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
-						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0)))
+						numtest.all = all(apply(raw, 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
+						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 						if(ncol(raw) == 3 & numtest.all){
 							track.format = "raw.csv"
 						}else if(ncol(raw) %% 3 == 0 & numtest.sans){
@@ -174,7 +179,7 @@ identify_track_format = function(filename = NULL) {
 		
 		# Give message to user
 		if(is.na(track.format)){
-			msg = paste0("\u2716", " The format of this track cannot be determined.\n Please visit http://rupertoverall.net/Rtrack/help.html for assistance.")
+			msg = paste0("\u2716", " The format of this track cannot be determined.\n Please visit https://rupertoverall.net/Rtrack/help.html for assistance.")
 			message(crayon::red(msg))
 		}else{
 			msg = paste0("\u2714", " This track seems to be in the format '", track.format, "'.")

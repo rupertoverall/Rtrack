@@ -17,6 +17,9 @@ The format code as a character string. This code can be used as the
   \code{\link{read_experiment}}.
 
   If the track format cannot be determined, \code{NA} is returned.
+
+  When run without a \code{filename} parameter, a character vector containing all
+  supported format codes is invisibly returned.
 }
 \description{
 A helper utility to determine the raw data format.
@@ -26,7 +29,7 @@ Raw data from several sources can be read in directly. A number of formats are
 supported, but it might not be clear which format code corresponds to your data. This
 function can be run on a typical file to try to guess your file format. If the format
 is not recognised, please visit the help page at
-\url{http://rupertoverall.net/Rtrack/help.html} where it is also possible to request
+\url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to request
 support for new formats.
 }
 \examples{
