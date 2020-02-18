@@ -18,10 +18,10 @@ The package is available from the [CRAN repository](https://cran.r-project.org/p
 install.packages("Rtrack") 
 ```
 
-\* If you encounter problems, please look at the [installation notes](http://rupertoverall.net/Rtrack/articles/Rtrack_install_page.html).
+\* If you encounter problems, please look at the [installation notes](https://rupertoverall.net/Rtrack/articles/Rtrack_install_page.html).
 
 
 Getting started
 ----------------------------------------------------------------------------------------------------------------
 
-To get started using Rtrack, it is recommended to visit the package website at [http://rupertoverall.net/Rtrack](http://rupertoverall.net/Rtrack)
+To get started using Rtrack, it is recommended to visit the package website at [https://rupertoverall.net/Rtrack](https://rupertoverall.net/Rtrack)

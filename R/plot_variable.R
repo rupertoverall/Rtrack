@@ -171,7 +171,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		segments(plot.val$x - pad, plot.val$y.mean - plot.val$y.se, plot.val$x + pad, plot.val$y.mean - plot.val$y.se, col = plot.val$col, ...)
 	})
 
-	if(legend) legend(max(plotting.data$x), plot.max, legend = names(factor.colours), fill = factor.colours, cex = .7, bty = "n", border = NA)
+	if(legend) legend(par("usr")[2], par("usr")[4], legend = names(factor.colours), fill = factor.colours, cex = .7, bty = "n", border = NA)
 
 	invisible(factor.colours)
 }
