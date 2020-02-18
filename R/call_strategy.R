@@ -69,11 +69,14 @@ call_strategy = function(metrics, version = "mouse_rf_6") {
 		summary.metrics$sd.d.goal[is.na(summary.metrics$sd.d.goal)] = 0 
 		summary.metrics$mean.d.goal[is.na(summary.metrics$mean.d.goal)] = arena.limit # Diameter of arena
 		summary.metrics$centroid.goal.displacement[is.na(summary.metrics$centroid.goal.displacement)] = arena.limit # Diameter of arena
-		summary.metrics$initial.trajectory.error[is.na(summary.metrics$initial.heading.error)] = arena.limit # Diameter of arena
+		summary.metrics$initial.trajectory.error[is.na(summary.metrics$initial.trajectory.error)] = arena.limit # Diameter of arena
 		summary.metrics$sd.d.old.goal[is.na(summary.metrics$sd.d.old.goal)] = 0
 		summary.metrics$mean.d.old.goal[is.na(summary.metrics$mean.d.old.goal)] = arena.limit # Diameter of arena
 		summary.metrics$centroid.old.goal.displacement[is.na(summary.metrics$centroid.old.goal.displacement)] = arena.limit # Diameter of arena
 		summary.metrics$initial.reversal.error[is.na(summary.metrics$initial.reversal.error)] = arena.limit # Diameter of arena
+		summary.metrics$mean.initial.heading.error[is.na(summary.metrics$mean.initial.heading.error)] = arena.limit # Diameter of arena
+		summary.metrics$efficiency[is.na(summary.metrics$efficiency)] = 0 
+
 		loadNamespace("randomForest")
 		# Malformed track metrics are called as NA
 		scores = matrix(NA, nrow = nrow(summary.metrics), ncol = length(strategy.names), dimnames = list(rownames(summary.metrics), names(strategy.names)))
