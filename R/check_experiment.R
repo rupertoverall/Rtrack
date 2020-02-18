@@ -80,7 +80,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 	experiment.data = NULL
 	experiment.info = NULL
 	check.pass = TRUE
-	
+
  	if(format == "json"){
 		if(!file.exists(filename)){
 			warning(paste0("The experiment archive file ('", filename, "') does not exist!"))
@@ -145,7 +145,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 				warning(paste0("The experiment description file ('", filename, "') does not exist!"))
 				check.pass = FALSE
 			}else{
-				experiment.data = utils::read.csv(filename, header = FALSE, stringsAsFactors = F)
+				experiment.data = utils::read.csv(filename, stringsAsFactors = F, check.names = FALSE)
 				rownames(experiment.data) = experiment.data$TrackID
 			}
 		}else{
@@ -164,7 +164,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 				if(!success){
 					warning(paste0("The file '",  filename, "' is not properly formed."))
 				}else{
-					experiment.data = utils::read.delim(filename, stringsAsFactors = F)
+					experiment.data = utils::read.delim(filename, stringsAsFactors = F, check.names = FALSE)
 					rownames(experiment.data) = experiment.data$TrackID
 				}
 				check.pass = FALSE
@@ -280,7 +280,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 				check.pass = FALSE
 			}else{
 				track.format.info = unique(experiment.data[, "_TrackFileFormat"])
-				supported.formats = c("ethovision.xt.excel", "ethovision.xt.csv", "ethovision.xt.csv2", "ethovision.3.csv", "ethovision.3.csv2", "raw.csv", "raw.csv2", "raw.tab", "dsnt.wmdat", "actimetrics.watermaze.csv")
+				supported.formats = suppressMessages(identify_track_format())
 				track.formats = sapply(track.format.info, function(info) strsplit(info, "_")[[1]][1])
 				paths.formatted = sapply(track.formats, simplify = T, USE.NAMES = T, function(trackformat) trackformat %in% supported.formats )
 				# supported.encodings = c(NA, "", "UTF-8", "UTF-8-BOM", "UTF-16", "UTF-32", "ISO-8859-1", "ISO-8859-15", "ISO-8859-2")
@@ -313,7 +313,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 	if(check.pass){
 		message(paste0(crayon::green("\u2714"), crayon::green(" This experiment appears to be valid and complete.")))
 	}else{
-		message(paste0(crayon::red("\u2716"), crayon::red(" This experiment has some problems. Please check the documentation at http://rupertoverall.net/Rtrack.")))
+		message(paste0(crayon::red("\u2716"), crayon::red(" This experiment has some problems. Please check the documentation at https://rupertoverall.net/Rtrack.")))
 	}
 	invisible(check.pass)
 }
