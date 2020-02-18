@@ -30,7 +30,7 @@ JSON archive contains exactly the same information as if reading from raw
 data. Calculated metrics are not exported, but can be recreated exactly.
 
 A formal description of the JSON format can be found in the schema file at
-\url{http://rupertoverall.net/Rtrack/Rtrack_schema_v1.json}.
+\url{https://rupertoverall.net/Rtrack/Rtrack_schema_v1.json}.
 }
 \examples{
 require(Rtrack)

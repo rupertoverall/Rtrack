@@ -8,7 +8,7 @@
 #' data. Calculated metrics are not exported, but can be recreated exactly.
 #'
 #' A formal description of the JSON format can be found in the schema file at
-#' \url{http://rupertoverall.net/Rtrack/Rtrack_schema_v1.json}.
+#' \url{https://rupertoverall.net/Rtrack/Rtrack_schema_v1.json}.
 #'
 #' @param experiment An \code{rtrack_experiment} object from
 #'   \code{\link{read_experiment}}.
@@ -54,12 +54,12 @@ export_json = function(experiment, tracks = "all", file = NULL){
 		stop("Invalid track identifiers, nothing will be exported.")
 	}
 	
-	schema = "http://rupertoverall.net/Rtrack/Rtrack_schema_v1.json"
+	schema = "https://rupertoverall.net/Rtrack/Rtrack_schema_v1.json"
 
 	experiment.info = list(
 		author.note = experiment$info$author.note,
 		processing.note = experiment$info$processing.note,
-		export.note = paste0("Experiment exported on ", date(), " by Rtrack (version ", paste0("Rtrack version ", utils::packageVersion("Rtrack")), ") <http://rupertoverall.net/Rtrack>.")
+		export.note = paste0("Experiment exported on ", date(), " by Rtrack (version ", paste0("Rtrack version ", utils::packageVersion("Rtrack")), ") <https://rupertoverall.net/Rtrack>.")
 	)
 	
 	experiment.data = lapply(tracks.subset, function(i){
