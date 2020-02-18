@@ -14,45 +14,54 @@ read_path(
 )
 }
 \arguments{
-\item{filename}{A raw data file containing path coordinates. See details for
-supported formats.}
+\item{filename}{A raw data file containing path coordinates. See details for supported
+formats.}
 
-\item{arena}{The \code{arena} object associated with this track. This is
-required to calibrate the track coordinates to the coordinate space of the
-arena.}
+\item{arena}{The \code{arena} object associated with this track. This is required to
+calibrate the track coordinates to the coordinate space of the arena.}
 
-\item{id}{An optional name for the experiment. Default is to generate this
-from the filename provided.}
+\item{id}{An optional name for the experiment. Default is to generate this from the
+filename provided.}
 
 \item{track.format}{The format of the raw file.}
 
-\item{track.index}{Only for formats where multiple tracks are stored in one
-file (ignored otherwise). This parameter indicates which section of the
-file corresponds to the track to be read. The exact usage depends on the
-format being read.}
+\item{track.index}{Only for formats where multiple tracks are stored in one file
+(ignored otherwise). This parameter indicates which section of the file corresponds
+to the track to be read. The exact usage depends on the format being read.}
 
-\item{interpolate}{Should missing data points be interpolated. Default is
-\code{FALSE}. Interpolation is not yet implemented.}
+\item{interpolate}{Should missing data points be interpolated. Default is \code{FALSE}.
+Interpolation is performed at evenly-spaced intervals after removing outliers.}
 }
 \value{
-An \code{rtrack_path} object containing the extracted swim path. This
-  is a list comprised of the components \code{raw.t} (timestamp),
-  \code{raw.x} (x coordinates), \code{raw.y} (y coordinates),\code{t},
-  \code{x} and \code{y} (normalised, cleaned and possibly interpolated
-  coordinates).
+An \code{rtrack_path} object containing the extracted swim path. This is a list
+  comprised of the components \code{raw.t} (timestamp), \code{raw.x} (x coordinates),
+  \code{raw.y} (y coordinates),\code{t}, \code{x} and \code{y} (normalised, cleaned and
+  possibly interpolated coordinates).
 }
 \description{
 The user will normally not need to call this directly. Use
 \code{\link{read_experiment}} instead.
 }
 \details{
-Raw data from several sources can be read in directly. The formats currently
-supported are 'ethovision.xt.excel' (for swim paths exported from the latest
-Ethovision software), 'ethovision.3.csv' (for data exported from the older
-Ethovision version 3) and 'raw.csv'. The 'raw.csv' format is a simple
-comma-delimited text file containing three columns 'Time', 'X' and 'Y'. The
-timestamp values in 'Time' should be in seconds from the start of the trial
-recording and coordinates should be in real-world units (e.g. cm, in).
+Raw data from several sources can be read in directly. The formats currently supported
+are 'ethovision.xt.excel' (for swim paths exported from the latest Ethovision
+software), 'ethovision.3.csv' (for data exported from the older Ethovision version 3)
+and 'raw.csv'. The 'raw.csv' format is a simple comma-delimited text file containing
+three columns 'Time', 'X' and 'Y'. The timestamp values in 'Time' should be in seconds
+from the start of the trial recording and coordinates should be in real-world units
+(e.g. cm, in).
+
+If \code{interpolate} is set to \code{TRUE}, then the raw data will be cleaned to
+remove outlier points and ensure that time points are evenly spaced. The following
+procedures are used: 1. any points with missing coordinate data are removed; 2. any
+points lying outside the arena are removed: 3. any points with excessive inter-point
+distances (outliers) are removed by first removing points that are more than 1 SD from
+the mean distance, then recalculating the mean and SD and repeating this step - this is
+typically sufficient to remove noise from video tracking (such as reflections from a
+water maze pool); 4. new time intervals are calculated from the first non-missing data
+point to the last using the sampling rate of the raw data; 5. interpolation of x and y
+values is performed at the new time points using the 'constant' interpolation method
+from \code{\link[stats]{approx}}.
 }
 \examples{
 require(Rtrack)
@@ -63,6 +72,7 @@ path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
 
 }
 \seealso{
-\code{\link{read_arena}}, and also \code{\link{read_experiment}} for
+\code{\link{read_arena}}, \code{\link{identify_track_format}} to identify the
+  format code for your raw data, and also \code{\link{read_experiment}} for
   processing many tracks at once.
 }

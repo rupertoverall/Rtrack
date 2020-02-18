@@ -3,37 +3,47 @@
 #' The user will normally not need to call this directly. Use
 #' \code{\link{read_experiment}} instead.
 #'
-#' Raw data from several sources can be read in directly. The formats currently
-#' supported are 'ethovision.xt.excel' (for swim paths exported from the latest
-#' Ethovision software), 'ethovision.3.csv' (for data exported from the older
-#' Ethovision version 3) and 'raw.csv'. The 'raw.csv' format is a simple
-#' comma-delimited text file containing three columns 'Time', 'X' and 'Y'. The
-#' timestamp values in 'Time' should be in seconds from the start of the trial
-#' recording and coordinates should be in real-world units (e.g. cm, in).
+#' Raw data from several sources can be read in directly. The formats currently supported
+#' are 'ethovision.xt.excel' (for swim paths exported from the latest Ethovision
+#' software), 'ethovision.3.csv' (for data exported from the older Ethovision version 3)
+#' and 'raw.csv'. The 'raw.csv' format is a simple comma-delimited text file containing
+#' three columns 'Time', 'X' and 'Y'. The timestamp values in 'Time' should be in seconds
+#' from the start of the trial recording and coordinates should be in real-world units
+#' (e.g. cm, in).
 #'
-#' @param filename A raw data file containing path coordinates. See details for
-#'   supported formats.
-#' @param arena The \code{arena} object associated with this track. This is
-#'   required to calibrate the track coordinates to the coordinate space of the
-#'   arena.
-#' @param id An optional name for the experiment. Default is to generate this
-#'   from the filename provided.
+#' If \code{interpolate} is set to \code{TRUE}, then the raw data will be cleaned to
+#' remove outlier points and ensure that time points are evenly spaced. The following
+#' procedures are used: 1. any points with missing coordinate data are removed; 2. any
+#' points lying outside the arena are removed: 3. any points with excessive inter-point
+#' distances (outliers) are removed by first removing points that are more than 1 SD from
+#' the mean distance, then recalculating the mean and SD and repeating this step - this is
+#' typically sufficient to remove noise from video tracking (such as reflections from a
+#' water maze pool); 4. new time intervals are calculated from the first non-missing data
+#' point to the last using the sampling rate of the raw data; 5. interpolation of x and y
+#' values is performed at the new time points using the 'constant' interpolation method
+#' from \code{\link[stats]{approx}}.
+#'
+#' @param filename A raw data file containing path coordinates. See details for supported
+#'   formats.
+#' @param arena The \code{arena} object associated with this track. This is required to
+#'   calibrate the track coordinates to the coordinate space of the arena.
+#' @param id An optional name for the experiment. Default is to generate this from the
+#'   filename provided.
 #' @param track.format The format of the raw file.
-#' @param track.index Only for formats where multiple tracks are stored in one
-#'   file (ignored otherwise). This parameter indicates which section of the
-#'   file corresponds to the track to be read. The exact usage depends on the
-#'   format being read.
-#' @param interpolate Should missing data points be interpolated. Default is
-#'   \code{FALSE}. Interpolation is not yet implemented.
+#' @param track.index Only for formats where multiple tracks are stored in one file
+#'   (ignored otherwise). This parameter indicates which section of the file corresponds
+#'   to the track to be read. The exact usage depends on the format being read.
+#' @param interpolate Should missing data points be interpolated. Default is \code{FALSE}.
+#'   Interpolation is performed at evenly-spaced intervals after removing outliers.
 #'
-#' @return An \code{rtrack_path} object containing the extracted swim path. This
-#'   is a list comprised of the components \code{raw.t} (timestamp),
-#'   \code{raw.x} (x coordinates), \code{raw.y} (y coordinates),\code{t},
-#'   \code{x} and \code{y} (normalised, cleaned and possibly interpolated
-#'   coordinates).
+#' @return An \code{rtrack_path} object containing the extracted swim path. This is a list
+#'   comprised of the components \code{raw.t} (timestamp), \code{raw.x} (x coordinates),
+#'   \code{raw.y} (y coordinates),\code{t}, \code{x} and \code{y} (normalised, cleaned and
+#'   possibly interpolated coordinates).
 #'
-#' @seealso \code{\link{read_arena}}, and also \code{\link{read_experiment}} for
-#'   processing many tracks at once.
+#' @seealso \code{\link{read_arena}}, \code{\link{identify_track_format}} to identify the
+#'   format code for your raw data, and also \code{\link{read_experiment}} for
+#'   processing many tracks at once. 
 #'
 #' @examples
 #' require(Rtrack)
@@ -45,6 +55,8 @@
 #' @importFrom readxl read_excel
 #' @importFrom methods as
 #' @importFrom utils capture.output
+#' @importFrom stats median approx
+#' @importFrom Hmisc approxExtrap
 #'
 #' @export
 read_path = function(filename, arena, id = NULL, track.format = "none", track.index = NULL, interpolate = FALSE) {
@@ -178,16 +190,25 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,2]))
 		}else if(track.format == "raw.csv"){
 			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
+			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
+				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
+			}
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "raw.csv2"){
 			coordinate.data = utils::read.csv2(filename, header = T, stringsAsFactors = FALSE)
+			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
+				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
+			}
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "raw.tab"){
 			coordinate.data = utils::read.delim(filename, header = T, stringsAsFactors = FALSE)
+			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
+				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
+			}
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x =suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
@@ -210,22 +231,44 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			stop(paste0("The specified path file format '", track.format, "' is not supported."))
 		}
 		if(interpolate){
-			## TODO Interpolation is not yet implemented (and is typically done by tracking software already)
 			# 1. Remove missing points
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
 			path$t = (path$raw.t / arena$correction$t)[!missing]
 			path$x = ((path$raw.x - arena$correction$x) / arena$correction$r)[!missing]
 			path$y = ((path$raw.y - arena$correction$y) / arena$correction$r)[!missing]
-			# 2. Remove any points falling outside the arena
-			clipped = is.na(sp::over(sp::SpatialPoints(data.frame(x = path$x, y = path$y)), arena$zones$pool))
-			if(any(clipped)){
-				path$t = path$t[!clipped]
-				path$x = path$x[!clipped]
-				path$y = path$y[!clipped]
-				warning(paste0("For '", path$id, "', some points on the path were outside the arena bounds. These have been removed."))
+			if(!all(missing)){ # If track is empty, then interpolation won't help (and will only crash)
+				# 2. Remove any points falling outside the arena
+				clipped = is.na(sp::over(sp::SpatialPoints(data.frame(x = path$x, y = path$y)), arena$zones$pool))
+				if(any(clipped)){
+					path$t = path$t[!clipped]
+					path$x = path$x[!clipped]
+					path$y = path$y[!clipped]
+					warning(paste0("For '", path$id, "', some points on the path were outside the arena bounds. These have been removed."))
+				}
+				# 3. Remove any points with excessive interpoint distances.
+				d = sqrt(diff(path$x) ^ 2 + diff(path$y) ^ 2)
+				outlier = d > (mean(d) + sd(d)) # Two-pass outlier filter. Remove gross outliers...
+				outlier = d > (mean(d[!outlier]) + sd(d[!outlier])) # ... and recalculate.
+				path$t = path$t[!outlier]
+				path$x = path$x[!outlier]
+				path$y = path$y[!outlier]
+				# 4. Check the timestamps for any missing intervals in the raw data
+				end = path$raw.t[length(path$raw.t)]
+				timestep = stats::median(diff(path$raw.t), na.rm = T) 
+				new.t = seq(0, end, timestep) / arena$correction$t
+				# 5. Replace missing and clipped points by interpolated/extrapolated values
+				path$x = Hmisc::approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
+				path$y = Hmisc::approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
+				path$t = new.t
+				# 6. Fix any overzealous extrapolation by bounding to the arena
+				clipped = is.na(sp::over(sp::SpatialPoints(data.frame(x = path$x, y = path$y)), arena$zones$pool))
+				if(any(clipped)){
+					path$x[clipped] = NA
+					path$y[clipped] = NA
+					path$x = stats::approx(path$t, path$x, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
+					path$y = stats::approx(path$t, path$y, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
+				}
 			}
-			# 3. Check the timestamps for any missing intervals in the raw data
-			# 4. Replace missing and clipped points by interpolated values
 		}else{
 			# Clean up by simply removing invalid points
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
@@ -242,8 +285,7 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 	}
 	if(length(path$t) == 0 & length(path$t) == 0 & length(path$t) == 0){
 		warning(paste0("No valid path data was extracted from the file '", basename(filename), "'. There may be a problem with the track file or the track may just be empty.")) 
-	}else{
+	}
 		class(path) = "rtrack_path"
 		return(path)
-	}
 }
