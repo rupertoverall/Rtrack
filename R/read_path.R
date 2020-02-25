@@ -188,6 +188,21 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			path$raw.t = suppressWarnings(as.numeric(strptime(coordinate.data[ ,3], "%m-%d-%Y %H:%M:%S"))) - suppressWarnings(as.numeric(strptime(coordinate.data[1 ,3], "%m-%d-%Y %H:%M:%S")))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,2]))
+		}else if(track.format == "topscan.txt"){
+			raw = utils::read.table(filename, header = F, stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			# Check the frame rate and catch missing or not found values
+			frame.rate = c(as.numeric(strsplit(paste0(raw[which(grepl("Frame", raw[, 1], ignore.case = TRUE) & grepl("Rate", raw[, 2], ignore.case = TRUE)), ], collapse = ""), "\\:")[[1]][2]), 0)[1]   
+			frame.rate = ifelse(frame.rate > 1, frame.rate, 1) # In fps or default to units if no other information available
+			header.col = grep("CenterX", raw, ignore.case = TRUE)
+			header.lines = grep("CenterX", raw[, header.col], ignore.case = TRUE) + 1
+			coordinate.data = raw[header.lines:nrow(raw), ]
+			headers = gsub("Format\\:", "", raw[header.lines - 1, ])# Not clear that there will always be a space after the 'Format:' tag
+			headers = headers[!headers == ""]
+			coordinate.data = coordinate.data[, 1:length(headers)]
+			colnames(coordinate.data) = headers
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data$FrameNum) - min(as.numeric(coordinate.data$FrameNum))) / frame.rate
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterX", headers)]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterY", headers)]))
 		}else if(track.format == "raw.csv"){
 			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
 			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){

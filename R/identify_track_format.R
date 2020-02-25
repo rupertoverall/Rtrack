@@ -50,6 +50,7 @@ identify_track_format = function(filename = NULL) {
 		"ethovision.xt.csv2",
 		"ethovision.3.csv",
 		"actimetrics.watermaze.csv",
+		"topscan.txt",
 		"dsnt.wmdat")
 		message(paste(c("Supported formats are:", paste0("   ", supported.formats)), collapse = "\n"))
 		invisible(supported.formats)
@@ -72,8 +73,6 @@ identify_track_format = function(filename = NULL) {
 			}
 		}else{ # Not Excel, so text text-based formats
 			# Check for UTF-8 encoding
-			
-	
 			if(tryCatch({suppressMessages(utils::read.table(filename, nrows = testlines, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = "UTF-8")); TRUE}, warning = function(e){FALSE})){
 				encoding = "UTF-8"			
 			}else if(tryCatch({suppressMessages(utils::read.table(filename, nrows = testlines, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = "UTF-8-BOM")); TRUE}, warning = function(e){FALSE})){
@@ -98,8 +97,8 @@ identify_track_format = function(filename = NULL) {
 			# Try reading the standard tabular types (from least to most common non-separator characters)
 			# Allow for up to 'headerlines' header lines (there is no way to predict this beforehand)
 			tsv.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\t", s)[[1]] > 0)) + 1 )) 
-			csv2.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr(";", s)[[1]] > 0)) + 1 ))
-			csv.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr(",", s)[[1]] > 0)) + 1 ))
+			csv2.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\\;", s)[[1]] > 0)) + 1 ))
+			csv.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\\,", s)[[1]] > 0)) + 1 ))
 			if(length(tsv.cols) == 1 & as.numeric(names(tsv.cols)) > 2){ # Minimum 3 columns required for t, x, y
 				# Has tabular data that is tab-separated (with or without headers)
 				# Is this a headerless table of numeric data?
@@ -161,7 +160,11 @@ identify_track_format = function(filename = NULL) {
 					}
 				}
 			}else{ # Not a csv or tsv
-				if(any(grepl(":", raw[1:4]))){
+				# Check for some known headers
+				if(any(grepl("FrameNum", raw) & grepl("CenterX", raw))){
+					# Probably Topscan
+						track.format = "topscan.txt"
+				}else if(any(grepl(":", raw[1:4]))){
 					# Probably 'dsnt.wmdat' in which case every 2nd is numeric and every 3rd is a POSIX timestamp (contains':')
 					m = matrix(grepl(":", raw[1:(testlines - testlines %% 3)]), nrow = 3)
 					if(!any(m[2, ]) & all(m[3, ])){
