@@ -10,7 +10,8 @@ read_path(
   id = NULL,
   track.format = "none",
   track.index = NULL,
-  interpolate = FALSE
+  interpolate = FALSE,
+  time.bounds = c(NA, NA)
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ to the track to be read. The exact usage depends on the format being read.}
 
 \item{interpolate}{Should missing data points be interpolated. Default is \code{FALSE}.
 Interpolation is performed at evenly-spaced intervals after removing outliers.}
+
+\item{time.bounds}{A vector of length 2 specifying the bounds on the measurement times
+(see Details).}
 }
 \value{
 An \code{rtrack_path} object containing the extracted swim path. This is a list
@@ -62,6 +66,16 @@ water maze pool); 4. new time intervals are calculated from the first non-missin
 point to the last using the sampling rate of the raw data; 5. interpolation of x and y
 values is performed at the new time points using the 'constant' interpolation method
 from \code{\link[stats]{approx}}.
+
+The raw path recordings can be truncated if necessary by specifying the
+\code{time.bounds} parameter. This is a vector of length 2 containing the earliest and
+latest time points that should be retained for analysis (any points outside these
+bounds will be discarded). A value of \code{NA} indicates that the path should not be
+truncated at that end (default is \code{c(NA, NA)} meaning that the path will extend to
+the start and end of the recorded values). The units used must match the time units in
+the track files. This option should not normally need to be set, but may be useful if
+data acquisition begins before, or ends after, the actual experimental trial (e.g. if
+recording was running during entry and exit from the arena).
 }
 \examples{
 require(Rtrack)
@@ -73,6 +87,6 @@ path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
 }
 \seealso{
 \code{\link{read_arena}}, \code{\link{identify_track_format}} to identify the
-  format code for your raw data, and also \code{\link{read_experiment}} for
-  processing many tracks at once.
+  format code for your raw data, and also \code{\link{read_experiment}} for processing
+  many tracks at once.
 }
