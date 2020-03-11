@@ -131,11 +131,11 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			for(n in 1:ncol(y.cum)){
 				polygon(c(x[1], x, x[length(x)]), c(0, y.cum[, n], 0), col = plot.colours[n], border = NA)
 			}
-			if(!is.null(plotting.data$Probe)){
+			if(exclude.probe & !is.null(plotting.data$Probe)){
 				probe = which(aggregate(plotting.data$Probe, list(plotting.data$`_Trial`, plotting.data$`_Day`), `[`, 1)$x == "TRUE")
 				rect(probe, 0, probe - 1, max(y.cum), border = NA, col = "#FFFFFFFF")
 			}
-			if(!is.null(boundaries)){
+			if(!is.null(boundaries) & length(boundaries) > 0){
 				rect(boundaries, 0, boundaries - 1, max(y.cum), border = NA, col = "#FFFFFFFF")
 				segments(boundaries - 0.5, 0, boundaries - 0.5, max(y.cum), lty = 3, lwd = boundary.lwd, col = "#000000FF")
 			}
