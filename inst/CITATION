@@ -1,0 +1,14 @@
+citHeader("To cite Rtrack in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Rtrack: a software package for reproducible automated water maze analysis",
+  author   = "Rupert W Overall, Sara Zocher, Alexander Garthe, Gerd Kempermann",
+  journal  = "bioRxiv",
+  year     = "2020",
+  volume   = "2020.02.27.967372",
+  number   = ,
+  pages    = ,
+  url      = "https://doi.org/10.1101/2020.02.27.967372",
+  textVersion = "RW Overall, S Zocher, A Garthe, G Kempermann (2020). Rtrack: a software package for reproducible automated water maze analysis. bioRxiv https://doi.org/10.1101/2020.02.27.967372"
+)
