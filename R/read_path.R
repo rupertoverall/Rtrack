@@ -23,6 +23,16 @@
 #' values is performed at the new time points using the 'constant' interpolation method
 #' from \code{\link[stats]{approx}}.
 #'
+#' The raw path recordings can be truncated if necessary by specifying the
+#' \code{time.bounds} parameter. This is a vector of length 2 containing the earliest and
+#' latest time points that should be retained for analysis (any points outside these
+#' bounds will be discarded). A value of \code{NA} indicates that the path should not be
+#' truncated at that end (default is \code{c(NA, NA)} meaning that the path will extend to
+#' the start and end of the recorded values). The units used must match the time units in
+#' the track files. This option should not normally need to be set, but may be useful if
+#' data acquisition begins before, or ends after, the actual experimental trial (e.g. if
+#' recording was running during entry and exit from the arena).
+#'
 #' @param filename A raw data file containing path coordinates. See details for supported
 #'   formats.
 #' @param arena The \code{arena} object associated with this track. This is required to
@@ -35,6 +45,8 @@
 #'   to the track to be read. The exact usage depends on the format being read.
 #' @param interpolate Should missing data points be interpolated. Default is \code{FALSE}.
 #'   Interpolation is performed at evenly-spaced intervals after removing outliers.
+#' @param time.bounds A vector of length 2 specifying the bounds on the measurement times
+#'   (see Details).
 #'
 #' @return An \code{rtrack_path} object containing the extracted swim path. This is a list
 #'   comprised of the components \code{raw.t} (timestamp), \code{raw.x} (x coordinates),
@@ -42,8 +54,8 @@
 #'   possibly interpolated coordinates).
 #'
 #' @seealso \code{\link{read_arena}}, \code{\link{identify_track_format}} to identify the
-#'   format code for your raw data, and also \code{\link{read_experiment}} for
-#'   processing many tracks at once. 
+#'   format code for your raw data, and also \code{\link{read_experiment}} for processing
+#'   many tracks at once.
 #'
 #' @examples
 #' require(Rtrack)
@@ -59,7 +71,7 @@
 #' @importFrom Hmisc approxExtrap
 #'
 #' @export
-read_path = function(filename, arena, id = NULL, track.format = "none", track.index = NULL, interpolate = FALSE) {
+read_path = function(filename, arena, id = NULL, track.format = "none", track.index = NULL, interpolate = FALSE, time.bounds = c(NA, NA)) {
 	format.info = strsplit(track.format, "_")[[1]]
 	track.format = tolower(format.info[1])
 	track.encoding = ifelse(!is.na(format.info[2]), format.info[2], "UTF-8")
@@ -248,6 +260,11 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 		if(interpolate){
 			# 1. Remove missing points
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
+			if(!all(is.na(time.bounds))){ # The user has specified bounds to the recording
+				if(is.na(time.bounds[1]) | time.bounds[1] < 0) time.bounds[1] = 0
+				if(is.na(time.bounds[2]) | time.bounds[2] > arena$correction$t) time.bounds[2] = arena$correction$t
+				missing = missing | (path$raw.t < time.bounds[1] | path$raw.t > time.bounds[2])
+			}
 			path$t = (path$raw.t / arena$correction$t)[!missing]
 			path$x = ((path$raw.x - arena$correction$x) / arena$correction$r)[!missing]
 			path$y = ((path$raw.y - arena$correction$y) / arena$correction$r)[!missing]
@@ -287,6 +304,11 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 		}else{
 			# Clean up by simply removing invalid points
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
+			if(!all(is.na(time.bounds))){ # The user has specified bounds to the recording
+				if(is.na(time.bounds[1]) | time.bounds[1] < 0) time.bounds[1] = 0
+				if(is.na(time.bounds[2]) | time.bounds[2] > arena$correction$t) time.bounds[2] = arena$correction$t
+				missing = missing | (path$raw.t < time.bounds[1] | path$raw.t > time.bounds[2])
+			}
 			path$t = (path$raw.t / arena$correction$t)[!missing]
 			path$x = ((path$raw.x - arena$correction$x) / arena$correction$r)[!missing]
 			path$y = ((path$raw.y - arena$correction$y) / arena$correction$r)[!missing]
