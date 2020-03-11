@@ -179,6 +179,9 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 		check = c("_TargetID", "_Day", "_Trial", "_Arena", "_TrackFile", "_TrackFileFormat") %in% colnames(experiment.data)
 		if(!all(check)) stop(paste0("The experiment description is missing the required column/s '", paste(c("_TargetID", "_Day", "_Trial", "_Arena", "_TrackFile", "_TrackFileFormat")[!check], collapse = "', '"), "'."))
 		if("_TrackIndex" %in% colnames(experiment.data)) experiment.data$`_TrackIndex` = as.numeric(experiment.data$`_TrackIndex`)
+		time.bounds = cbind(rep(NA, nrow(experiment.data)), rep(NA, nrow(experiment.data)))
+		if("_PathStart" %in% colnames(experiment.data)) time.bounds[, 1] = as.numeric(experiment.data$`_PathStart`)
+		if("_PathEnd" %in% colnames(experiment.data)) time.bounds[, 2] = as.numeric(experiment.data$`_PathEnd`)
 		# Extract user columns to a data.frame of factors
 		user.columns = sapply(sapply(colnames(experiment.data), strsplit, ""), "[", 1) != "_"
 		user.factors = data.frame(experiment.data[, user.columns, drop = FALSE], stringsAsFactors = F)
@@ -191,7 +194,7 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 			pb = pbapply::startpb(min = 0, max = nrow(experiment.data))
 			metrics = lapply(1:nrow(experiment.data), function(i){
 				track = experiment.data[i, ]
-				this.path = Rtrack::read_path(paste0(data.dir, as.character(track["_TrackFile"])), arenas[[as.character(track["_Arena"])]], id = as.character(track["_TrackID"]), track.format = as.character(track["_TrackFileFormat"]), track.index = experiment.data[i, "_TrackIndex"], interpolate = interpolate)
+				this.path = Rtrack::read_path(paste0(data.dir, as.character(track["_TrackFile"])), arenas[[as.character(track["_Arena"])]], id = as.character(track["_TrackID"]), track.format = as.character(track["_TrackFileFormat"]), track.index = experiment.data[i, "_TrackIndex"], interpolate = interpolate, time.bounds = time.bounds[i, ])
 				pbapply::setpb(pb, i)
 				ifelse(length(this.path$t) > 1, {
 					this.arena = arenas[[as.character(track["_Arena"])]] # Pre-loaded
@@ -206,7 +209,7 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 			parallel::clusterExport(cluster, c("arenas", "data.dir", "experiment.data"), envir = environment()) # Needed for socket clusters
 			metrics = pbapply::pblapply(1:nrow(experiment.data), function(i){
 				track = experiment.data[i, ]
-				this.path = Rtrack::read_path(paste0(data.dir, as.character(track["_TrackFile"])), arenas[[as.character(track["_Arena"])]], id = as.character(track["_TrackID"]), track.format = as.character(track["_TrackFileFormat"]), interpolate = interpolate)
+				this.path = Rtrack::read_path(paste0(data.dir, as.character(track["_TrackFile"])), arenas[[as.character(track["_Arena"])]], id = as.character(track["_TrackID"]), track.format = as.character(track["_TrackFileFormat"]), interpolate = interpolate, time.bounds = time.bounds[i, ])
 				ifelse(length(this.path$t) > 1, {
 					this.arena = arenas[[as.character(track["_Arena"])]] # Pre-loaded
 					this.metrics = Rtrack::calculate_metrics(this.path, this.arena)
