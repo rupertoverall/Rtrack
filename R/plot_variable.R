@@ -128,7 +128,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		all.trials = unique(plotting.data[, c("_Day", "_Trial")])
 		boundaries = apply(boundaries, 1, function(row) which(all.trials$`_Day` == as.numeric(row["day"]) & all.trials$`_Trial` == as.numeric(row["trial"])) )
 	}
-	if(!is.null(boundaries)){
+	if(!is.null(boundaries) & length(boundaries) > 0){
 		segments(boundaries - 0.5, plot.min, boundaries - 0.5, plot.max, lty = 3, lwd = boundary.lwd, col = "#000000FF")
 	}
 	# Plotting.data is ordered, so put day marker at first trial of the day (might not be trial 1 if there were experimental dropouts)
@@ -159,8 +159,9 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		y.se = by(group$y, list(group$`_Trial`, group$`_Day`), sd) / sqrt(by(group$y, list(group$`_Trial`, group$`_Day`), length))
 	
 		plotting.segments = cbind(x[1:(length(x) - 1)], y.mean[1:(length(x) - 1)], x[2:length(x)], y.mean[2:length(x)])
-		plotting.segments = plotting.segments[-(boundaries - 1), ]
-		
+		if(!is.null(boundaries) & length(boundaries) > 0){
+			plotting.segments = plotting.segments[-(boundaries - 1), ]
+		}
 		list(plotting.segments = plotting.segments, x = x, y.mean = y.mean, y.se = y.se, col = factor.colours[level])
 	}, simplify = FALSE, USE.NAMES = TRUE)
 
