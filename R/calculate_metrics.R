@@ -172,6 +172,7 @@ calculate_metrics = function(path, arena){
 					path.length = path.length,
 					mean.velocity = mean(velocity),
 					sd.velocity = stats::sd(velocity),
+					total.time = total.time,
 					latency.to.goal = latency.to.goal,
 					goal.crossings = zone.crossings$goal,
 					old.goal.crossings = zone.crossings$old.goal,
