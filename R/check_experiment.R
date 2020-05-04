@@ -283,10 +283,6 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 				supported.formats = suppressMessages(identify_track_format())
 				track.formats = sapply(track.format.info, function(info) strsplit(info, "_")[[1]][1])
 				paths.formatted = sapply(track.formats, simplify = T, USE.NAMES = T, function(trackformat) trackformat %in% supported.formats )
-				# supported.encodings = c(NA, "", "UTF-8", "UTF-8-BOM", "UTF-16", "UTF-32", "ISO-8859-1", "ISO-8859-15", "ISO-8859-2")
-				# track.encoding = sapply(track.format.info, function(info) strsplit(info, "_")[[1]][2])
-				# paths.encoded = sapply(track.encoding, simplify = T, USE.NAMES = T, function(encoding) encoding %in% supported.encodings )
-				# paths.formatted = paths.formatted & paths.encoded
 				if(length(which(!paths.formatted)) > 1){
 					warning(paste0("The track formats ", paste(paste0("'", names(paths.formatted)[!paths.formatted], "'"), collapse = ", "), " are not supported."))
 					check.pass = FALSE
