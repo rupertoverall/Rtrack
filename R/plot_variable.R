@@ -29,31 +29,32 @@
 #' entering the day and trial index into rows of this table. Use
 #' \code{boundaries = NULL} to suppress boundary lines altogether.
 
-#' @param variable The variable/metric that should be plotted. See Details for
-#'   the ways to specify this.
+#' @param variable The variable/metric that should be plotted. See Details for the ways to
+#'   specify this.
 #' @param experiment The \code{rtrack_experiment} object as returned from
 #'   \code{\link{read_experiment}}.
-#' @param factor The factor by which the data should be grouped. Each factor
-#'   level will be plotted as a separate series. If not specified, all values
-#'   are plotted together in one series.
-#' @param factor.colours A colour to be used for each factor level. If not
-#'   specified, colours will be automatically generated. The vector of colours
-#'   is returned to allow additional plot customisation.
+#' @param factor The factor by which the data should be grouped. Each factor level will be
+#'   plotted as a separate series. If not specified, all values are plotted together in
+#'   one series.
+#' @param factor.colours A colour to be used for each factor level. If not specified,
+#'   colours will be automatically generated. The vector of colours is returned to allow
+#'   additional plot customisation.
 #' @param exclude.probe Should data from probe trials be excluded (see Details).
-#' @param boundaries Where should the boundaries between arena types be drawn
-#'   (see Details).
+#' @param boundaries Where should the boundaries between arena types be drawn (see
+#'   Details).
 #' @param legend Should a legend be added. Default is \code{TRUE}.
+#' @param x.axis The scale of the x axis. Default, "Day", is to add a labelled axis with
+#'   tick marks at each day. If this parameter is set to "Trial", then tick marks are
+#'   added for each trial. If set to "none", then no x axis will be drawn.
 #' @param titles Should titles be drawn. Default is to add a main title and titles for the
 #'   x and y axes. These can be supressed and added afterwards (using
-#'   \code{\link[graphics]{title}}) (for example if they should not be in English).
-#' @param x.axis Should an x axis be drawn. Default is to add a labelled axis with tick
-#'   marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
-#'   drawn and it can be added later using \code{\link[graphics]{axis}}.
+#'   \code{\link[graphics]{title}}). This might be helpful for localising to a different
+#'   language for example.
 #' @param margins The margins of the plot (see the option \code{mar} in
-#'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they
-#'   can be overridden if, for example, factor names are very long.
-#' @param ... Other parameters passed to \code{\link[graphics]{segments}} to
-#'   control the plotted lines.
+#'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they can be
+#'   overridden if, for example, factor names are very long.
+#' @param ... Other parameters passed to \code{\link[graphics]{segments}} to control the
+#'   plotted lines.
 #'
 #' @return A named vector of colours used for each factor level.
 #'
@@ -65,7 +66,7 @@
 #' @importFrom stats aggregate
 #'
 #' @export
-plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", exclude.probe = FALSE, boundaries = NA, legend = TRUE, titles = TRUE, x.axis = TRUE, margins = c(5, 4, 4, 8), ...){
+plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", exclude.probe = FALSE, boundaries = NA, legend = TRUE, x.axis = "Day", titles = TRUE, margins = c(5, 4, 4, 8), ...){
 	plotting.data = experiment$factors
 	# The variable can be in the summary metrics, in the experiment factors, or a separately supplied factor/character vector (checked in that order)
 	if(is.character(variable) & length(variable) == 1 & variable[1] %in% experiment$summary.variables){
@@ -122,7 +123,15 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	}else{
 		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "", ylab = "")
 	}
-	if(titles) title(xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
+	if(titles){
+		if(tolower(x.axis) == "day"){
+			title(xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
+		}else if(tolower(x.axis) == "trial"){
+			title(xlab = "Trial", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
+		}else{
+			title(xlab = "", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
+		}
+	}
 	pad = 0.1
 	arena = as.character(aggregate(plotting.data$`_Arena`, list(plotting.data$`_Trial`, plotting.data$`_Day`), `[`, 1)$x)
 	# If boundaries not user-set, then place at the interface of different arenas
@@ -140,9 +149,12 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	}
 	# Plotting.data is ordered, so put day marker at first trial of the day (might not be trial 1 if there were experimental dropouts)
 	day = match(unique(plotting.data$`_Day`), unique(plotting.data[, c("_Trial", "_Day")])$`_Day`)
-	if(x.axis) axis(1, at = c(day, max(day) + max(as.numeric(plotting.data$`_Trial`))), labels = c(1:length(day), ""))
-	if(titles) title(main = paste0("Plot of ", gsub("\\.", " ", variable)))
-	
+	if(tolower(x.axis) == "day"){
+		axis(1, at = c(day, max(day) + max(as.numeric(plotting.data$`_Trial`))), labels = c(1:length(day), ""))
+	}else if(tolower(x.axis) == "trial"){
+		axis(1, at = 1:length(unique(plotting.data$trial.id)), labels = 1:length(unique(plotting.data$trial.id)))
+	}
+
 	if(all(factor.colours == "auto")){
 		if(all(names(plot.series) %in% names(factor.colours)) & !is.null(names(factor.colours))){
 			# Reorder the factor based on the order of colour names (but still auto-select colours)

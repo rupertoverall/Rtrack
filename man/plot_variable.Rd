@@ -12,48 +12,49 @@ plot_variable(
   exclude.probe = FALSE,
   boundaries = NA,
   legend = TRUE,
+  x.axis = "Day",
   titles = TRUE,
-  x.axis = TRUE,
   margins = c(5, 4, 4, 8),
   ...
 )
 }
 \arguments{
-\item{variable}{The variable/metric that should be plotted. See Details for
-the ways to specify this.}
+\item{variable}{The variable/metric that should be plotted. See Details for the ways to
+specify this.}
 
 \item{experiment}{The \code{rtrack_experiment} object as returned from
 \code{\link{read_experiment}}.}
 
-\item{factor}{The factor by which the data should be grouped. Each factor
-level will be plotted as a separate series. If not specified, all values
-are plotted together in one series.}
+\item{factor}{The factor by which the data should be grouped. Each factor level will be
+plotted as a separate series. If not specified, all values are plotted together in
+one series.}
 
-\item{factor.colours}{A colour to be used for each factor level. If not
-specified, colours will be automatically generated. The vector of colours
-is returned to allow additional plot customisation.}
+\item{factor.colours}{A colour to be used for each factor level. If not specified,
+colours will be automatically generated. The vector of colours is returned to allow
+additional plot customisation.}
 
 \item{exclude.probe}{Should data from probe trials be excluded (see Details).}
 
-\item{boundaries}{Where should the boundaries between arena types be drawn
-(see Details).}
+\item{boundaries}{Where should the boundaries between arena types be drawn (see
+Details).}
 
 \item{legend}{Should a legend be added. Default is \code{TRUE}.}
 
+\item{x.axis}{The scale of the x axis. Default, "Day", is to add a labelled axis with
+tick marks at each day. If this parameter is set to "Trial", then tick marks are
+added for each trial. If set to "none", then no x axis will be drawn.}
+
 \item{titles}{Should titles be drawn. Default is to add a main title and titles for the
 x and y axes. These can be supressed and added afterwards (using
-\code{\link[graphics]{title}}) (for example if they should not be in English).}
-
-\item{x.axis}{Should an x axis be drawn. Default is to add a labelled axis with tick
-marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
-drawn and it can be added later using \code{\link[graphics]{axis}}.}
+\code{\link[graphics]{title}}). This might be helpful for localising to a different
+language for example.}
 
 \item{margins}{The margins of the plot (see the option \code{mar} in
-\code{\link[graphics]{par}}). The defaults should usually be fine, but they
-can be overridden if, for example, factor names are very long.}
+\code{\link[graphics]{par}}). The defaults should usually be fine, but they can be
+overridden if, for example, factor names are very long.}
 
-\item{...}{Other parameters passed to \code{\link[graphics]{segments}} to
-control the plotted lines.}
+\item{...}{Other parameters passed to \code{\link[graphics]{segments}} to control the
+plotted lines.}
 }
 \value{
 A named vector of colours used for each factor level.

@@ -11,8 +11,8 @@ plot_strategies(
   exclude.probe = FALSE,
   boundaries = NA,
   legend = TRUE,
+  x.axis = "Day",
   titles = TRUE,
-  x.axis = TRUE,
   screen = FALSE,
   margins = c(5, 4, 4, 8),
   ...
@@ -33,13 +33,14 @@ Details).}
 
 \item{legend}{Should a legend be drawn. Default is to add a legend to the plot.}
 
+\item{x.axis}{The scale of the x axis. Default, "Day", is to add a labelled axis with tick
+marks at each day. If this parameter is set to "Trial", then tick marks are added for
+each trial. If set to "none", then no x axis will be drawn.}
+
 \item{titles}{Should titles be drawn. Default is to add a main title and titles for the
 x and y axes. These can be supressed and added afterwards (using
-\code{\link[graphics]{title}}) (for example if they should not be in English).}
-
-\item{x.axis}{Should an x axis be drawn. Default is to add a labelled axis with tick
-marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
-drawn and it can be added later using \code{\link[graphics]{axis}}.}
+\code{\link[graphics]{title}}). This might be helpful for localising to a different
+language for example.}
 
 \item{screen}{Should multiple plots be drawn to one page. Default is \code{FALSE}. This
 can be useful for advanced layout using \code{\link[graphics]{split.screen}}.}

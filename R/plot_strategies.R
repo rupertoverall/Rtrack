@@ -28,12 +28,13 @@
 #' @param boundaries Where should the boundaries between arena types be drawn (see
 #'   Details).
 #' @param legend Should a legend be drawn. Default is to add a legend to the plot.
+#' @param x.axis The scale of the x axis. Default, "Day", is to add a labelled axis with tick
+#'   marks at each day. If this parameter is set to "Trial", then tick marks are added for
+#'   each trial. If set to "none", then no x axis will be drawn.
 #' @param titles Should titles be drawn. Default is to add a main title and titles for the
 #'   x and y axes. These can be supressed and added afterwards (using
-#'   \code{\link[graphics]{title}}) (for example if they should not be in English).
-#' @param x.axis Should an x axis be drawn. Default is to add a labelled axis with tick
-#'   marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
-#'   drawn and it can be added later using \code{\link[graphics]{axis}}.
+#'   \code{\link[graphics]{title}}). This might be helpful for localising to a different
+#'   language for example.
 #' @param screen Should multiple plots be drawn to one page. Default is \code{FALSE}. This
 #'   can be useful for advanced layout using \code{\link[graphics]{split.screen}}.
 #' @param margins The margins of the plot (see the option \code{mar} in
@@ -56,7 +57,7 @@
 #' @importFrom stats aggregate
 #'
 #' @export
-plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, titles = TRUE, x.axis = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
+plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, x.axis = "Day", titles = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
 	strategies.class = NULL
 	if(class(strategies) == "rtrack_strategies" & class(experiment) == "rtrack_experiment"){
 		strategies.class = "rtrack_strategies"
@@ -133,7 +134,15 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			on.exit(par(.parprevious))
 
 			plot(x, seq(0, max(y.cum), length.out = length(x)), type = "n", las = 1, xaxt = "n", xaxs="i", yaxs="i", ylab = "", xlab = "")
-			if(titles) title(ylab = "Strategy usage", xlab = "Day")
+			if(titles){
+				if(tolower(x.axis) == "day"){
+					title(ylab = "Strategy usage", xlab = "Day")
+				}else if(tolower(x.axis) == "trial"){
+					title(ylab = "Strategy usage", xlab = "Trial")
+				}else{
+					title(ylab = "Strategy usage", xlab = "")
+				}
+			}
 			for(n in 1:ncol(y.cum)){
 				polygon(c(x[1], x, x[length(x)]), c(0, y.cum[, n], 0), col = plot.colours[n], border = NA)
 			}
@@ -146,7 +155,11 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 				segments(boundaries - 0.5, 0, boundaries - 0.5, max(y.cum), lty = 3, lwd = boundary.lwd, col = "#000000FF")
 			}
 			box(lwd = boundary.lwd)
-			if(x.axis) axis(1, at = day, labels = 1:length(day))
+			if(tolower(x.axis) == "day"){
+				axis(1, at = day, labels = 1:length(day))
+			}else if(tolower(x.axis) == "trial"){
+				axis(1, at = 1:length(unique(plotting.data$trial.id)), labels = 1:length(unique(plotting.data$trial.id)))
+			}
 			if(titles){
 				if(length(plot.series) > 1){
 					title(main = paste0("Strategy usage for ", tolower(factor), " '", level, "'"))
