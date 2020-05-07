@@ -43,6 +43,12 @@
 #' @param boundaries Where should the boundaries between arena types be drawn
 #'   (see Details).
 #' @param legend Should a legend be added. Default is \code{TRUE}.
+#' @param titles Should titles be drawn. Default is to add a main title and titles for the
+#'   x and y axes. These can be supressed and added afterwards (using
+#'   \code{\link[graphics]{title}}) (for example if they should not be in English).
+#' @param x.axis Should an x axis be drawn. Default is to add a labelled axis with tick
+#'   marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
+#'   drawn and it can be added later using \code{\link[graphics]{axis}}.
 #' @param margins The margins of the plot (see the option \code{mar} in
 #'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they
 #'   can be overridden if, for example, factor names are very long.
@@ -59,7 +65,7 @@
 #' @importFrom stats aggregate
 #'
 #' @export
-plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", exclude.probe = FALSE, boundaries = NA, legend = TRUE, margins = c(5, 4, 4, 8), ...){
+plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", exclude.probe = FALSE, boundaries = NA, legend = TRUE, titles = TRUE, x.axis = TRUE, margins = c(5, 4, 4, 8), ...){
 	plotting.data = experiment$factors
 	# The variable can be in the summary metrics, in the experiment factors, or a separately supplied factor/character vector (checked in that order)
 	if(is.character(variable) & length(variable) == 1 & variable[1] %in% experiment$summary.variables){
@@ -112,10 +118,11 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	if(legend){
 		.parprevious = graphics::par(mar = margins, xpd = TRUE)
 		on.exit(par(.parprevious))
-		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2))) ))
+		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "", ylab = "")
 	}else{
-		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2))) ))
+		plot(plotting.data$x, plotting.data$y, ylim = c(plot.min, plot.max), type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "", ylab = "")
 	}
+	if(titles) title(xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
 	pad = 0.1
 	arena = as.character(aggregate(plotting.data$`_Arena`, list(plotting.data$`_Trial`, plotting.data$`_Day`), `[`, 1)$x)
 	# If boundaries not user-set, then place at the interface of different arenas
@@ -133,8 +140,8 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	}
 	# Plotting.data is ordered, so put day marker at first trial of the day (might not be trial 1 if there were experimental dropouts)
 	day = match(unique(plotting.data$`_Day`), unique(plotting.data[, c("_Trial", "_Day")])$`_Day`)
-	axis(1, at = c(day, max(day) + max(as.numeric(plotting.data$`_Trial`))), labels = c(1:length(day), ""))
-	title(main = paste0("Plot of ", gsub("\\.", " ", variable)))
+	if(x.axis) axis(1, at = c(day, max(day) + max(as.numeric(plotting.data$`_Trial`))), labels = c(1:length(day), ""))
+	if(titles) title(main = paste0("Plot of ", gsub("\\.", " ", variable)))
 	
 	if(all(factor.colours == "auto")){
 		if(all(names(plot.series) %in% names(factor.colours)) & !is.null(names(factor.colours))){

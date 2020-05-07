@@ -2,56 +2,61 @@
 #'
 #' Plots the strategy usage for all groups.
 #'
-#' The strategies returned by \code{\link{read_experiment}} can be shown in a
-#' summary plot. In these plots, the fraction of subjects utilising a particular
-#' strategy is shown for each day/trial. If a factor is provided, then one plot
-#' will be made for each level of the factor. To view data for mutliple factors,
-#' they will need to be collapsed into one composite factor for plotting using
-#' this function. If probe trials were used, these can be ignored (not plotted)
-#' as the strategy use in the absence of the goal will be somewhat different.
-#' For this to work, a column named 'Probe' must be present in the experiment
-#' description spreadsheet and must contain the value 'TRUE' for each probe
+#' The strategies returned by \code{\link{read_experiment}} can be shown in a summary
+#' plot. In these plots, the fraction of subjects utilising a particular strategy is shown
+#' for each day/trial. If a factor is provided, then one plot will be made for each level
+#' of the factor. To view data for mutliple factors, they will need to be collapsed into
+#' one composite factor for plotting using this function. If probe trials were used, these
+#' can be ignored (not plotted) as the strategy use in the absence of the goal will be
+#' somewhat different. For this to work, a column named 'Probe' must be present in the
+#' experiment description spreadsheet and must contain the value 'TRUE' for each probe
 #' trial.
 #'
-#' Boundaries are drawn (as broken vertical lines) between different arena types
-#' (for example between acquisition and goal reversal phases of a Morris water
-#' maze experiment). By default, these are added between each unique arena
-#' definition. If this is not appropriate, then this can be overridden by
-#' providing the \code{boundaries} parameter with a \code{\link{data.frame}}
-#' with two columns 'day' and 'trial'. Multiple boundaries can be defined by
-#' entering the day and trial index into rows of this table. Use
-#' \code{boundaries = NULL} to suppress boundary lines altogether.
+#' Boundaries are drawn (as broken vertical lines) between different arena types (for
+#' example between acquisition and goal reversal phases of a Morris water maze
+#' experiment). By default, these are added between each unique arena definition. If this
+#' is not appropriate, then this can be overridden by providing the \code{boundaries}
+#' parameter with a \code{\link{data.frame}} with two columns 'day' and 'trial'. Multiple
+#' boundaries can be defined by entering the day and trial index into rows of this table.
+#' Use \code{boundaries = NULL} to suppress boundary lines altogether.
 #'
-#' @param strategies The strategy calls as returned from
-#'   \code{\link{call_strategy}} or similar.
-#' @param experiment The experiment object as returned from
-#'   \code{\link{read_experiment}}.
+#' @param strategies The strategy calls as returned from \code{\link{call_strategy}} or
+#'   similar.
+#' @param experiment The experiment object as returned from \code{\link{read_experiment}}.
 #' @param factor The factor by which the data should be grouped.
 #' @param exclude.probe Should data from probe trials be excluded (see Details).
-#' @param boundaries Where should the boundaries between arena types be drawn (see Details).
-#' @param legend Should a legend be drawn. Default is to add a legend to the
-#'   plot.
-#' @param screen Should multiple plots be drawn to one page. Default is
-#'   \code{FALSE}. This can be useful for advanced layout using
-#'   \code{\link[graphics]{split.screen}}.
+#' @param boundaries Where should the boundaries between arena types be drawn (see
+#'   Details).
+#' @param legend Should a legend be drawn. Default is to add a legend to the plot.
+#' @param titles Should titles be drawn. Default is to add a main title and titles for the
+#'   x and y axes. These can be supressed and added afterwards (using
+#'   \code{\link[graphics]{title}}) (for example if they should not be in English).
+#' @param x.axis Should an x axis be drawn. Default is to add a labelled axis with tick
+#'   marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
+#'   drawn and it can be added later using \code{\link[graphics]{axis}}.
+#' @param screen Should multiple plots be drawn to one page. Default is \code{FALSE}. This
+#'   can be useful for advanced layout using \code{\link[graphics]{split.screen}}.
 #' @param margins The margins of the plot (see the option \code{mar} in
-#'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they
-#'   can be overridden if, for example, factor names are very long.
-#' @param ... Other parameters passed to \code{\link[graphics]{segments}} to
-#'   control the plotted lines.
+#'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they can be
+#'   overridden if, for example, factor names are very long.
+#' @param ... Other parameters passed to \code{\link[graphics]{segments}} to control the
+#'   plotted lines.
 #'
-#' @return A \code{\link[base]{list}} of strategy call information.
+#' @return This function invisibly returns a named list for each level of the supplied
+#'   factor. Each element of this list holds a \code{\link[base]{matrix}} of plotting
+#'   values for every strategy / trial. These values are cumulative counts of strategy use
+#'   for all subjects at each trial. They specify the uppermost points of a layered series
+#'   of polygons and could be used to build a customised plot if desired.
 #'
 #' @examples
 #' # This function relies on data too large to include in the package.
 #' # For a worked example, please see the vignette "Rtrack MWM analysis".
 #'
-#' @importFrom graphics par plot lines segments axis box polygon rect title
-#'   split.screen
+#' @importFrom graphics par plot lines segments axis box polygon rect title split.screen
 #' @importFrom stats aggregate
 #'
 #' @export
-plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
+plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, titles = TRUE, x.axis = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
 	strategies.class = NULL
 	if(class(strategies) == "rtrack_strategies" & class(experiment) == "rtrack_experiment"){
 		strategies.class = "rtrack_strategies"
@@ -111,7 +116,7 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			screen.layout = t(sapply(1:n, function(m){ c(0, 1, m / n - 1 / n, m / n) }))
 			screens = graphics::split.screen(screen.layout)
 		}
-		plot.values = sapply(1:length(names(plot.series)), function(i){
+		plot.values = lapply(1:length(names(plot.series)), function(i){
 			level = names(plot.series)[i]
 			group = plotting.data[plot.series[[level]], ]
 			strategy.ids = as.numeric(strategies$calls[rownames(group), ]$strategy)
@@ -127,7 +132,8 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 			.parprevious = graphics::par(mar = margins, xpd = TRUE)
 			on.exit(par(.parprevious))
 
-			plot(x, seq(0, max(y.cum), length.out = length(x)), type = "n", las = 1, xaxt = "n", xaxs="i", yaxs="i", ylab = "Strategy usage", xlab = "Day")
+			plot(x, seq(0, max(y.cum), length.out = length(x)), type = "n", las = 1, xaxt = "n", xaxs="i", yaxs="i", ylab = "", xlab = "")
+			if(titles) title(ylab = "Strategy usage", xlab = "Day")
 			for(n in 1:ncol(y.cum)){
 				polygon(c(x[1], x, x[length(x)]), c(0, y.cum[, n], 0), col = plot.colours[n], border = NA)
 			}
@@ -140,16 +146,21 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 				segments(boundaries - 0.5, 0, boundaries - 0.5, max(y.cum), lty = 3, lwd = boundary.lwd, col = "#000000FF")
 			}
 			box(lwd = boundary.lwd)
-			axis(1, at = day, labels = 1:length(day))
-			if(length(plot.series) > 1){
-				title(main = paste0("Strategy usage for ", tolower(factor), " '", level, "'"))
-			}else{
-				title(main = paste0("Strategy usage for all data"))
+			if(x.axis) axis(1, at = day, labels = 1:length(day))
+			if(titles){
+				if(length(plot.series) > 1){
+					title(main = paste0("Strategy usage for ", tolower(factor), " '", level, "'"))
+				}else{
+					title(main = paste0("Strategy usage for all data"))
+				}
 			}
 			if(legend) graphics::legend(x = nrow(y.cum), y = max(y.cum), legend = rev(strategies$strategy.names), fill = rev(strategies$strategy.colours), cex = .7, bty = "n", border = NA)
-		return(NULL)
+			colnames(y.cum) = strategies$strategy.names
+			rownames(y.cum) = paste("Trial", 1:nrow(y.cum), sep = "_")
+			return(y.cum)
 		})
+		names(plot.values) = names(plot.series)
 		graphics::close.screen(screens)
 	}
-	invisible()
+	invisible(plot.values)
 }

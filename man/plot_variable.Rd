@@ -12,6 +12,8 @@ plot_variable(
   exclude.probe = FALSE,
   boundaries = NA,
   legend = TRUE,
+  titles = TRUE,
+  x.axis = TRUE,
   margins = c(5, 4, 4, 8),
   ...
 )
@@ -37,6 +39,14 @@ is returned to allow additional plot customisation.}
 (see Details).}
 
 \item{legend}{Should a legend be added. Default is \code{TRUE}.}
+
+\item{titles}{Should titles be drawn. Default is to add a main title and titles for the
+x and y axes. These can be supressed and added afterwards (using
+\code{\link[graphics]{title}}) (for example if they should not be in English).}
+
+\item{x.axis}{Should an x axis be drawn. Default is to add a labelled axis with tick
+marks at each day. If this parameter is set to \code{FALSE} then no x axis will be
+drawn and it can be added later using \code{\link[graphics]{axis}}.}
 
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should usually be fine, but they
