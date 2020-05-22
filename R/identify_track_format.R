@@ -49,6 +49,7 @@ identify_track_format = function(filename = NULL) {
 		"ethovision.xt.csv",
 		"ethovision.xt.csv2",
 		"ethovision.3.csv",
+		"ethovision.3.csv2",
 		"actimetrics.watermaze.csv",
 		"topscan.txt",
 		"dsnt.wmdat")
@@ -115,7 +116,8 @@ identify_track_format = function(filename = NULL) {
 				}
 			}else if(length(csv2.cols) == 1 & as.numeric(names(csv2.cols)) > 2){ 
 				# Has tabular data that is semicolon-separated (with or without headers)
-				if(grepl("Number\\ of\\ header\\ lines", raw[1]) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20,]))){
+				# NOTE that Ethovison XT can use variously "Header Lines:" of "Number of header Lines:", so check for both.
+				if(grepl("header\\ lines", raw[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20,]))){
 					track.format = "ethovision.xt.csv2"
 				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20,]))){
 					track.format = "ethovision.3.csv2"
@@ -138,7 +140,8 @@ identify_track_format = function(filename = NULL) {
 				}
 			}else if(length(csv.cols) == 1 & as.numeric(names(csv.cols)) > 2){ 
 				# Has tabular data that is comma-separated (with or without headers)
-				if(grepl("Number\\ of\\ header\\ lines", raw[1]) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20]))){
+				# NOTE that Ethovison XT can use variously "Header Lines:" of "Number of header Lines:", so check for both.
+				if(grepl("header\\ lines", raw[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20]))){
 					track.format = "ethovision.xt.csv"
 				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20]))){
 					track.format = "ethovision.3.csv"
