@@ -178,7 +178,14 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			header.lines = grep("Sample no\\.", raw[, 1], ignore.case = TRUE) - 1
 			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE, skip = header.lines)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
-			path$raw.x =suppressWarnings(as.numeric(coordinate.data$X))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
+		}else if(track.format == "ethovision.3.csv2"){
+			raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = track.encoding)
+			header.lines = grep("Sample no\\.", raw[, 1], ignore.case = TRUE) - 1
+			coordinate.data = utils::read.csv2(filename, header = T, stringsAsFactors = FALSE, skip = header.lines)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "actimetrics.watermaze.csv"){
 			if(is.null(track.index)){
@@ -237,7 +244,7 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
 			}
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
-			path$raw.x =suppressWarnings(as.numeric(coordinate.data$X))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "raw.nh.csv"){
 			coordinate.data = utils::read.csv(filename, header = F, stringsAsFactors = FALSE)
