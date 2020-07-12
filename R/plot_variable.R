@@ -112,7 +112,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		plot.series = list("All data" = 1:nrow(experiment$factors))
 	}
 	
-	global.y.mean = by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), mean)
+	global.y.mean = by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), mean, na.rm = T)
 	global.y.se = by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), sd, na.rm = T) / sqrt(by(plotting.data$y, list(plotting.data$`_Trial`, plotting.data$`_Day`, plot.factor), length))
 	plot.min = min(global.y.mean - global.y.se, na.rm = T)
 	plot.max = max(global.y.mean + global.y.se, na.rm = T)
@@ -174,8 +174,8 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	plot.values = sapply(names(plot.series), function(level){
 		group = plotting.data[plot.series[[level]], ]
 		x = unique(group$x)
-		y.mean = by(group$y, list(group$`_Trial`, group$`_Day`), mean)
-		y.se = by(group$y, list(group$`_Trial`, group$`_Day`), sd) / sqrt(by(group$y, list(group$`_Trial`, group$`_Day`), length))
+		y.mean = by(group$y, list(group$`_Trial`, group$`_Day`), mean, na.rm = T)
+		y.se = by(group$y, list(group$`_Trial`, group$`_Day`), sd, na.rm = T) / sqrt(by(group$y, list(group$`_Trial`, group$`_Day`), length))
 	
 		plotting.segments = cbind(x[1:(length(x) - 1)], y.mean[1:(length(x) - 1)], x[2:length(x)], y.mean[2:length(x)])
 		if(!is.null(boundaries) & length(boundaries) > 0){
