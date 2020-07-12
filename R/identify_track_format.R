@@ -39,20 +39,23 @@ identify_track_format = function(filename = NULL) {
 	encoding = "UTF-8" # Default = UTF-8
 	if(length(filename) == 0){
 		supported.formats = c(
-		"raw.csv",
-		"raw.csv2",
-		"raw.tab",
-		"raw.nh.csv",
-		"raw.nh.csv2",
-		"raw.nh.tab",
 		"ethovision.xt.excel",
 		"ethovision.xt.csv",
 		"ethovision.xt.csv2",
 		"ethovision.3.csv",
 		"ethovision.3.csv2",
 		"actimetrics.watermaze.csv",
+		"dsnt.wmdat",
 		"topscan.txt",
-		"dsnt.wmdat")
+		"anymaze.csv",
+		"anymaze.csv2",
+		"anymaze.tab",
+		"raw.csv",
+		"raw.csv2",
+		"raw.tab",
+		"raw.nh.csv",
+		"raw.nh.csv2",
+		"raw.nh.tab")
 		message(paste(c("Supported formats are:", paste0("   ", supported.formats)), collapse = "\n"))
 		invisible(supported.formats)
 	}else{
@@ -105,7 +108,9 @@ identify_track_format = function(filename = NULL) {
 				# Is this a headerless table of numeric data?
 				raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
 				numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
-				if(ncol(raw) >= 3 & numtest.all){
+				if(any(grepl("Time\tCentre\\ pos", raw[1:20]))){
+					track.format = "anymaze.tab"
+				}else if(ncol(raw) >= 3 & numtest.all){
 					track.format = "raw.nh.tab"
 				}else{
 					raw = utils::read.delim(filename, header = T, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
@@ -121,6 +126,8 @@ identify_track_format = function(filename = NULL) {
 					track.format = "ethovision.xt.csv2"
 				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20,]))){
 					track.format = "ethovision.3.csv2"
+				}else if(any(grepl("Tim;,Centre\\ pos", raw[1:20]))){
+					track.format = "anymaze.csv2"
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv2(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
@@ -140,11 +147,13 @@ identify_track_format = function(filename = NULL) {
 				}
 			}else if(length(csv.cols) == 1 & as.numeric(names(csv.cols)) > 2){ 
 				# Has tabular data that is comma-separated (with or without headers)
-				# NOTE that Ethovison XT can use variously "Header Lines:" of "Number of header Lines:", so check for both.
+				# NOTE that Ethovison XT can use variously "Header Lines:" or "Number of header Lines:", so check for both.
 				if(grepl("header\\ lines", raw[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20]))){
 					track.format = "ethovision.xt.csv"
 				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20]))){
 					track.format = "ethovision.3.csv"
+				}else if(any(grepl("Time,Centre\\ pos", raw[1:20]))){
+					track.format = "anymaze.csv"
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)

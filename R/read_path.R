@@ -222,6 +222,26 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$FrameNum) - min(as.numeric(coordinate.data$FrameNum))) / frame.rate
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterX", headers)]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterY", headers)]))
+		}else if(track.format == "anymaze.csv"){
+			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			path$raw.t = suppressWarnings(as.numeric(strptime(coordinate.data[ ,1], format = "%H:%M:%OS"))) - suppressWarnings(as.numeric(strptime(coordinate.data[1 ,1], format = "%H:%M:%OS")))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
+		}else if(track.format == "anymaze.csv2"){
+			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ";", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
+		}else if(track.format == "anymaze.tab"){
+			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = "\t", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
+		# }else if(track.format == "eztrack.csv"){
+		# 	coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+		# 	path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
+		# 	path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
+		# 	path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 		}else if(track.format == "raw.csv"){
 			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
 			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
