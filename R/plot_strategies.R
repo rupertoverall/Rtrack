@@ -102,7 +102,7 @@ plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = 
 		# If boundaries not user-set, then place at the interface of different arenas
 		if(is.null(boundaries)){
 			boundaries = NULL
-		}else if(is.na(boundaries)){
+		}else if(all(is.na(boundaries))){
 			boundaries = which(arena != c(arena[1], arena[-length(arena)]))
 		}else{
 			colnames(boundaries) = tolower(colnames(boundaries))
