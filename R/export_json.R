@@ -66,7 +66,7 @@ export_json = function(experiment, tracks = "all", file = NULL){
 		arena = experiment$metrics[[i]]$arena
 		factor.names = names(experiment$factors)[!grepl("^_", names(experiment$factors))]
 		factors = experiment$factors[i, factor.names]
-		names(factors) = paste0("factor_", names(factors))
+		if(length(factors) > 0)	names(factors) = paste0("factor_", factor.names)
 		c(
 			list(
 				id = experiment$metrics[[i]]$id,
