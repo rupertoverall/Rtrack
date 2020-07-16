@@ -295,7 +295,7 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
 			if(!all(is.na(time.bounds))){ # The user has specified bounds to the recording
 				if(is.na(time.bounds[1]) | time.bounds[1] < 0) time.bounds[1] = 0
-				if(is.na(time.bounds[2]) | (time.bounds[2] - time.bounds[1]) > arena$correction$t) time.bounds[2] = arena$correction$t
+				if(is.na(time.bounds[2]) | time.bounds[2] > arena$correction$t) time.bounds[2] = time.bounds[1] + arena$correction$t
 				missing = missing | (path$raw.t < time.bounds[1] | path$raw.t > time.bounds[2])
 			}
 			path$t = (path$raw.t / arena$correction$t)[!missing]
@@ -339,7 +339,7 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			missing = is.na(path$raw.t) | is.na(path$raw.x) | is.na(path$raw.y)
 			if(!all(is.na(time.bounds))){ # The user has specified bounds to the recording
 				if(is.na(time.bounds[1]) | time.bounds[1] < 0) time.bounds[1] = 0
-				if(is.na(time.bounds[2]) | (time.bounds[2] - time.bounds[1]) > arena$correction$t) time.bounds[2] = arena$correction$t
+				if(is.na(time.bounds[2]) | time.bounds[2] > arena$correction$t) time.bounds[2] = time.bounds[1] + arena$correction$t
 				missing = missing | (path$raw.t < time.bounds[1] | path$raw.t > time.bounds[2])
 			}
 			path$t = (path$raw.t / arena$correction$t)[!missing]
