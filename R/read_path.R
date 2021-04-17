@@ -65,7 +65,6 @@
 #' path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
 #'
 #' @importFrom readxl read_excel
-#' @importFrom methods as
 #' @importFrom utils capture.output
 #' @importFrom stats median approx
 #' @importFrom Hmisc approxExtrap
@@ -99,7 +98,8 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			})
 			header.lines = as.numeric(raw[grep("header", raw[, 1], ignore.case = TRUE), 2])
 			header = as.data.frame(raw[1:header.lines, 1:2])
-			coordinate.data = suppressWarnings(as.data.frame(apply(raw[(header.lines + 1):nrow(raw), ], 2, methods::as, "numeric")))
+			coordinate.data = raw[(header.lines + 1):nrow(raw), ]
+			for(i in 1:ncol(coordinate.data)) coordinate.data[, i] = suppressWarnings(methods::as(coordinate.data[, i], "numeric"))
 			# Ethovision allows export with units on a separate line as an option.
 			# The following check is to work out which row contains the correct header information
 			if(length(grep('X\\ center', raw[header.lines, ])) > 0){
@@ -125,7 +125,8 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			header = as.matrix(suppressMessages(utils::read.table(filename, nrows = 100, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = track.encoding)))
 			header.lines = as.numeric(gsub("[^0-9]", "", strsplit(header[1], ",")[[1]][2]))
 			raw = suppressMessages(utils::read.csv(filename, header = FALSE, stringsAsFactors = FALSE, skip = header.lines, fileEncoding = track.encoding))
-			coordinate.data = suppressWarnings(as.data.frame(apply(raw[(header.lines + 1):nrow(raw), ], 2, methods::as, "numeric")))
+			coordinate.data = raw[(header.lines + 1):nrow(raw), ]
+			for(i in 1:ncol(coordinate.data)) coordinate.data[, i] = suppressWarnings(methods::as(coordinate.data[, i], "numeric"))
 			# Ethovision allows export with units on a separate line as an option.
 			# The following check is to work out which row contains the correct header information
 			if(length(grep('X\\ center', header[header.lines])) > 0){
@@ -151,7 +152,8 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 			header = as.matrix(suppressMessages(utils::read.table(filename, nrows = 100, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = track.encoding)))
 			header.lines = as.numeric(gsub("[^0-9]", "", strsplit(header[1], ";")[[1]][2]))
 			raw = suppressMessages(utils::read.csv2(filename, header = FALSE, stringsAsFactors = FALSE, skip = header.lines, fileEncoding = track.encoding))
-			coordinate.data = suppressWarnings(as.data.frame(apply(raw[(header.lines + 1):nrow(raw), ], 2, methods::as, "numeric")))
+			coordinate.data = raw[(header.lines + 1):nrow(raw), ]
+			for(i in 1:ncol(coordinate.data)) coordinate.data[, i] = suppressWarnings(methods::as(coordinate.data[, i], "numeric"))
 			# Ethovision allows export with units on a separate line as an option.
 			# The following check is to work out which row contains the correct header information
 			if(length(grep('X\\ center', header[header.lines])) > 0){
