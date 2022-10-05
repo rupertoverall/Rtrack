@@ -2,7 +2,7 @@
 % Please edit documentation in R/call_mwm_strategy_garthe.R
 \name{call_mwm_strategy_garthe}
 \alias{call_mwm_strategy_garthe}
-\title{Strategy classification using the Garthe classifier.}
+\title{Strategy classification using the legacy Garthe classifier.}
 \usage{
 call_mwm_strategy_garthe(metrics, parameters = NULL)
 }

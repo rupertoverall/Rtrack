@@ -1,4 +1,4 @@
-#' Strategy classification using the Garthe classifier.
+#' Strategy classification using the legacy Garthe classifier.
 #'
 #' Calculates strategies using a method based on Garthe et. al. 2009.
 #'
