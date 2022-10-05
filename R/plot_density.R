@@ -35,6 +35,7 @@
 #'
 #' @importFrom graphics par plot lines segments
 #' @importFrom grDevices colorRampPalette
+#' @importFrom methods is
 #' @importFrom sp SpatialPolygons
 #' @importFrom rgeos gDifference
 #' @importFrom KernSmooth bkde2D
@@ -42,11 +43,11 @@
 #' @export
 plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette(c('#FCFBFD', '#9E9AC8', '#3F007D'))(256), legend = TRUE, goal.col = "black", goal.lwd = 2, resolution = 600, margins = c(0, 2, 4, 2), ...) {
  # Accept a 'rtrack_metrics' object or a list of 'rtrack_metrics' objects
-	if(class(metrics) == 'rtrack_metrics' | class(metrics[[1]]) == 'rtrack_metrics'){
+	if(is(metrics, 'rtrack_metrics') | is(metrics[[1]], 'rtrack_metrics')){
 	if(is.null(title)){
-		if(class(metrics) == 'rtrack_metrics'){
+		if(is(metrics, 'rtrack_metrics')){
 			title = metrics$id
-		}else if(class(metrics[[1]]) == 'rtrack_metrics'){
+		}else if(is(metrics[[1]], 'rtrack_metrics')){
 			title = "Multiple paths"
 		}else{
 			title = ""
@@ -58,7 +59,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 		plot.goal = NULL
 		plot.old.goal = NULL
 		pool.bounding.box = NULL
-		if(class(metrics) == 'list'){
+		if(is(metrics, 'list')){
 			plot.pool = sp::SpatialPolygons(lapply(1:length(metrics), function(i){
 				pol = metrics[[i]]$arena$zones$pool@polygons[[1]]
 				pol@ID = paste("pool", i, sep = "_")

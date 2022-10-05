@@ -47,7 +47,7 @@
 #'
 #' @export
 plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight.interpolated = TRUE, highlight.initial = TRUE, margins = c(0, 2, 4, 2), ...) {
-	if(class(metrics) == 'rtrack_metrics'){
+	if(is(metrics, 'rtrack_metrics')){
 		if(is.null(title)){title = metrics$id}
 		if(is.null(title)){title = ""} # Empty title string in case using metrics$id failed
 		parameters = c(...)
