@@ -37,7 +37,7 @@
 #' @export
 calculate_metrics = function(path, arena){
 	metrics = NULL
-	if(class(path) == "rtrack_path" & class(arena) == "rtrack_arena"){
+	if(is(path, "rtrack_path") & is(arena, "rtrack_arena")){
 		if(length(path$t) > 0){
 			# Area covered by the swim path as a fraction of the total arena
 			path.coverage = sp::Polygons( list(sp::Polygon(cbind(path$x, path$y))), "coverage")

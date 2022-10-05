@@ -32,7 +32,7 @@
 #'
 #' @export
 call_strategy = function(metrics, version = "mouse_rf_6") {
-	if(!(class(metrics) == "rtrack_metrics") & !(class(metrics) == "list" & class(metrics[[1]]) == "rtrack_metrics")){
+	if(!(is(metrics, "rtrack_metrics")) & !(is(metrics, "list") & is(metrics[[1]], "rtrack_metrics"))){
 		stop("This function requires an 'rtrack_metrics' object or a list of 'rtrack_metrics' objects. Did you create this with 'calculate_metrics' or 'read_experiment'?")
 	}else{
 		strategy.names = c(

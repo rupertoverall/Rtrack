@@ -59,7 +59,7 @@
 #' @export
 plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, x.axis = "Day", titles = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
 	strategies.class = NULL
-	if(class(strategies) == "rtrack_strategies" & class(experiment) == "rtrack_experiment"){
+	if(is(strategies, "rtrack_strategies") & is(experiment, "rtrack_experiment")){
 		strategies.class = "rtrack_strategies"
 	}
 	if(strategies.class == "rtrack_strategies"){

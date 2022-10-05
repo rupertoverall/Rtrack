@@ -28,7 +28,7 @@
 #'
 #' @export
 call_mwm_strategy_garthe = function(metrics, parameters = NULL) {
-	if(!(class(metrics) == "rtrack_metrics") & !(class(metrics) == "list" & class(metrics[[1]]) == "rtrack_metrics")){
+	if(!(is(metrics, "rtrack_metrics")) & !(is(metrics, "list") & is(metrics[[1]], "rtrack_metrics"))){
 		stop("This function requires a 'rtrack_metrics' object or a list of 'rtrack_metrics' objects. Did you create this with 'calculate_metrics' or 'read.mwm.experiment'?")
 	}else{
 		strategy.names = c(
@@ -54,7 +54,7 @@ call_mwm_strategy_garthe = function(metrics, parameters = NULL) {
 			"0" = "white"
 		)
 		metrics.list = metrics # By default assume a list has been passed...
-		if((class(metrics) == "rtrack_metrics")){
+		if((is(metrics, "rtrack_metrics"))){
 			# ...if not, wrap the single 'rtrack_metrics' object into a list of length 1 and run the lapply below
 			metrics.list = list(metrics)
 		}
