@@ -23,8 +23,6 @@
 #' @export
 subset_experiment = function(experiment, tracks = "all"){
 	if(is(experiment, "rtrack_experiment")){
-		stop("This function requires an 'rtrack_experiment' object. Did you create this with 'read_experiment'?")
-	}else{
 		tracks.subset = NA
 		if((length(tracks) == 1) & (tracks[1] == "all")){
 			tracks.subset = names(experiment$metrics)
@@ -50,5 +48,7 @@ subset_experiment = function(experiment, tracks = "all"){
 		}
 		class(result) = class(experiment)
 		return(result)
-	}
+	}else{
+		stop("This function requires an 'rtrack_experiment' object. Did you create this with 'read_experiment'?")
+	}		
 }

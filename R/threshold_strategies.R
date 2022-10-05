@@ -41,8 +41,8 @@
 #' @import randomForest
 #'
 #' @export
-threshold_strategies = function(strategies, threshold = NULL) {
-	if(class(strategies) != "rtrack_strategies"){
+threshold_strategies = function(strategies, threshold = NULL){
+	if(is(strategies, "rtrack_strategies")){
 		stop("Supplied parameter 'strategies' must be a 'rtrack_strategies' object.")
 	}else{
 		if(strategies$method == "rtrack"){
