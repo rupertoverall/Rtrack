@@ -67,7 +67,6 @@
 #' @importFrom readxl read_excel
 #' @importFrom utils capture.output
 #' @importFrom stats median approx
-#' @importFrom Hmisc approxExtrap
 #'
 #' @export
 read_path = function(filename, arena, id = NULL, track.format = "none", track.index = NULL, interpolate = FALSE, time.bounds = c(NA, NA)) {
@@ -324,8 +323,12 @@ read_path = function(filename, arena, id = NULL, track.format = "none", track.in
 				timestep = stats::median(diff(path$raw.t), na.rm = T) 
 				new.t = seq(0, end, timestep) / arena$correction$t
 				# 5. Replace missing and clipped points by interpolated/extrapolated values
-				path$x = Hmisc::approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
-				path$y = Hmisc::approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
+				## TODO Temporary solution to deal with dependency issue. 
+				## Hmisc::approxExtrap function has been provided as an internal helper function. 
+				##path$x = Hmisc::approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
+				##path$y = Hmisc::approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
+				path$x = approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
+				path$y = approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
 				path$t = new.t
 				# 6. Fix any overzealous extrapolation by bounding to the arena
 				clipped = is.na(sp::over(sp::SpatialPoints(data.frame(x = path$x, y = path$y)), arena$zones$pool))
