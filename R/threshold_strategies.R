@@ -43,8 +43,6 @@
 #' @export
 threshold_strategies = function(strategies, threshold = NULL){
 	if(is(strategies, "rtrack_strategies")){
-		stop("Supplied parameter 'strategies' must be a 'rtrack_strategies' object.")
-	}else{
 		if(strategies$method == "rtrack"){
 			threshold = as.numeric(threshold)
 			if(threshold > 1){threshold = 1; warning("The parameter 'threshold' should be in the range 0 - 1.")}
@@ -66,6 +64,8 @@ threshold_strategies = function(strategies, threshold = NULL){
 		}else{
 			stop("Invalid 'rtrack_strategies' object.")
 		}
+	}else{
+		stop("Supplied parameter 'strategies' must be a 'rtrack_strategies' object.")
 	}
 	class(strategies) = "rtrack_strategies"
 	return(strategies)

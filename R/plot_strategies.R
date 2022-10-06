@@ -58,12 +58,7 @@
 #'
 #' @export
 plot_strategies = function(strategies, experiment, factor = NA, exclude.probe = FALSE, boundaries = NA, legend = TRUE, x.axis = "Day", titles = TRUE, screen = FALSE, margins = c(5, 4, 4, 8), ...){
-	strategies.class = NULL
 	if(is(strategies, "rtrack_strategies") & is(experiment, "rtrack_experiment")){
-		strategies.class = "rtrack_strategies"
-	}
-	if(strategies.class == "rtrack_strategies"){
-
 		parameters = c(...)
 		boundary.lwd = as.numeric(parameters[which(names(parameters) == "lwd")])
 		if(length(boundary.lwd) == 0 ) boundary.lwd = 2
