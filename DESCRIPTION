@@ -11,7 +11,6 @@ Description: A toolkit for the analysis of paths from spatial tracking experimen
     This package is centered on an approach using machine learning for path classification.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Imports:
     crayon,
     graphics,
