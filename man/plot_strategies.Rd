@@ -11,78 +11,72 @@ plot_strategies(
   exclude.probe = FALSE,
   boundaries = NA,
   legend = TRUE,
-  x.axis = "Day",
-  titles = TRUE,
   screen = FALSE,
   margins = c(5, 4, 4, 8),
-  ...
+  lwd = 2
 )
 }
 \arguments{
-\item{strategies}{The strategy calls as returned from \code{\link{call_strategy}} or
-similar.}
+\item{strategies}{The strategy calls as returned from
+\code{\link{call_strategy}}.}
 
-\item{experiment}{The experiment object as returned from \code{\link{read_experiment}}.}
+\item{experiment}{The experiment object as returned from
+\code{\link{read_experiment}}.}
 
-\item{factor}{The factor by which the data should be grouped.}
+\item{factor}{The factor by which the data should be grouped. The default,
+\code{NA}, means that all data will be shown in one plot. Specifying a
+grouping factor will cause a separate plot to be generated for each group.}
 
 \item{exclude.probe}{Should data from probe trials be excluded (see Details).}
 
-\item{boundaries}{Where should the boundaries between arena types be drawn (see
-Details).}
+\item{boundaries}{Where should the boundaries between arena types be drawn
+(see Details).}
 
-\item{legend}{Should a legend be drawn. Default is to add a legend to the plot.}
+\item{legend}{Should a legend be drawn. Default is to add a legend to the
+plot.}
 
-\item{x.axis}{The scale of the x axis. Default, "Day", is to add a labelled axis with tick
-marks at each day. If this parameter is set to "Trial", then tick marks are added for
-each trial. If set to "none", then no x axis will be drawn.}
-
-\item{titles}{Should titles be drawn. Default is to add a main title and titles for the
-x and y axes. These can be supressed and added afterwards (using
-\code{\link[graphics]{title}}). This might be helpful for localising to a different
-language for example.}
-
-\item{screen}{Should multiple plots be drawn to one page. Default is \code{FALSE}. This
-can be useful for advanced layout using \code{\link[graphics]{split.screen}}.}
+\item{screen}{Should multiple plots be drawn to one page. Default is
+\code{FALSE}. This can be useful for advanced layout using
+\code{\link[graphics]{split.screen}}.}
 
 \item{margins}{The margins of the plot (see the option \code{mar} in
-\code{\link[graphics]{par}}). The defaults should usually be fine, but they can be
-overridden if, for example, factor names are very long.}
+\code{\link[graphics]{par}}). The defaults should usually be fine, but they
+can be overridden if, for example, factor names are very long.}
 
-\item{...}{Other parameters passed to \code{\link[graphics]{segments}} to control the
-plotted lines.}
+\item{lwd}{The thickness of the plotted lines. Default is 2.}
 }
 \value{
-This function invisibly returns a named list for each level of the supplied
-  factor. Each element of this list holds a \code{\link[base]{matrix}} of plotting
-  values for every strategy / trial. These values are cumulative counts of strategy use
-  for all subjects at each trial. They specify the uppermost points of a layered series
-  of polygons and could be used to build a customised plot if desired.
+A \code{\link[base]{list}} of strategy call information.
 }
 \description{
 Plots the strategy usage for all groups.
 }
 \details{
-The strategies returned by \code{\link{read_experiment}} can be shown in a summary
-plot. In these plots, the fraction of subjects utilising a particular strategy is shown
-for each day/trial. If a factor is provided, then one plot will be made for each level
-of the factor. To view data for mutliple factors, they will need to be collapsed into
-one composite factor for plotting using this function. If probe trials were used, these
-can be ignored (not plotted) as the strategy use in the absence of the goal will be
-somewhat different. For this to work, a column named 'Probe' must be present in the
-experiment description spreadsheet and must contain the value 'TRUE' for each probe
+The strategies returned by \code{\link{read_experiment}} can be shown in a
+summary plot. In these plots, the fraction of subjects utilising a particular
+strategy is shown for each day/trial. If a factor is provided, then one plot
+will be made for each level of the factor. To view data for mutliple factors,
+they will need to be collapsed into one composite factor for plotting using
+this function. If probe trials were used, these can be ignored (not plotted)
+as the strategy use in the absence of the goal will be somewhat different.
+For this to work, a column named "Probe" must be present in the experiment
+description spreadsheet and must contain the value "TRUE" for each probe
 trial.
 
-Boundaries are drawn (as broken vertical lines) between different arena types (for
-example between acquisition and goal reversal phases of a Morris water maze
-experiment). By default, these are added between each unique arena definition. If this
-is not appropriate, then this can be overridden by providing the \code{boundaries}
-parameter with a \code{\link{data.frame}} with two columns 'day' and 'trial'. Multiple
-boundaries can be defined by entering the day and trial index into rows of this table.
-Use \code{boundaries = NULL} to suppress boundary lines altogether.
+Boundaries are drawn (as broken vertical lines) between different arena types
+(for example between acquisition and goal reversal phases of a Morris water
+maze experiment). By default, these are added between each unique arena
+definition. If this is not appropriate, then this can be overridden by
+providing the \code{boundaries} parameter with a \code{\link{matrix}} or
+\code{\link{data.frame}} with two columns for the day and trial number
+respectively. Multiple boundaries can be defined by entering the day and
+trial index into rows of this table. Use \code{boundaries = NULL} to suppress
+boundary lines altogether.
 }
 \examples{
 # This function relies on data too large to include in the package.
-# For a worked example, please see the vignette "Rtrack MWM analysis".
+# For a worked example, please see the vignette "Rtrack MWM analysis"
+# in the online package documentation at
+# https://rupertoverall.net/Rtrack/.
 
 }

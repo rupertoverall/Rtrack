@@ -9,18 +9,19 @@ plot_density(
   title = NULL,
   col = (grDevices::colorRampPalette(c("#FCFBFD", "#9E9AC8", "#3F007D")))(256),
   legend = TRUE,
-  goal.col = "black",
-  goal.lwd = 2,
+  feature.col = "black",
+  feature.lwd = NA,
+  lwd = 1,
   resolution = 600,
-  margins = c(0, 2, 4, 2),
-  ...
+  margins = c(0, 0, 3, 0)
 )
 }
 \arguments{
-\item{metrics}{An \code{rtrack_metrics} object from \code{\link{calculate_metrics}}.}
+\item{metrics}{An \code{rtrack_metrics} object from
+\code{\link{calculate_metrics}}.}
 
-\item{title}{An optional title for the plot. The default is to use the
-path name saved in the \code{rtrack_metrics} object.}
+\item{title}{An optional title for the plot. The default is to use the path
+name saved in the \code{rtrack_metrics} object.}
 
 \item{col}{Colours for the density map. These can be provided as any vector
 of colours. The recommended (and default) approach is to use
@@ -29,11 +30,15 @@ simple white-to-blue scale.}
 
 \item{legend}{Should a colour scale legend be drawn? Default is TRUE.}
 
-\item{goal.col}{The colour to plot the goal outlines. Black by default, but
-it may be useful to change this if a very dark colour scheme is used.}
+\item{feature.col}{The colour to plot outlines of arena features (goals,
+objects, aversive zone etc., depending on the arena type). Black by
+default, but it may be useful to change this if a very dark colour scheme
+is used.}
 
-\item{goal.lwd}{The width of the lines used to plot the goals. By default
-this is drawn heavier to make them stand out.}
+\item{feature.lwd}{The width of the lines used to plot the feature outlines.
+By default this is drawn heavier to make them stand out.}
+
+\item{lwd}{The thickness of the lines used to draw the arena. Default is 1.}
 
 \item{resolution}{The resolution of the heatmap in pixels. The default is 600
 x 600.}
@@ -41,19 +46,16 @@ x 600.}
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should normally not need to be
 changed.}
-
-\item{...}{Additional arguments passed to the plot method in the
-\code{\link[sp]{SpatialPolygons-class}} to modify plot details.}
 }
 \description{
-Plots a density map ('heatmap') of the path.
+Plots a density map ("heatmap") of the path.
 }
 \examples{
 require(Rtrack)
-track_file <- system.file("extdata", "Track_1.csv", package = "Rtrack")
-arena_description <- system.file("extdata", "Arena_SW.txt", package = "Rtrack")
+track_file <- system.file("extdata", "Track_1.tab", package = "Rtrack")
+arena_description <- system.file("extdata", "Arena.txt", package = "Rtrack")
 arena <- read_arena(arena_description)
-path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
+path <- read_path(track_file, arena, track.format = "raw.tab")
 metrics <- calculate_metrics(path, arena)
 plot_density(metrics)
 

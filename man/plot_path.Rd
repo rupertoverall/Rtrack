@@ -8,10 +8,10 @@ plot_path(
   metrics,
   title = NULL,
   quadrants = FALSE,
-  highlight.interpolated = TRUE,
-  highlight.initial = TRUE,
-  margins = c(0, 2, 4, 2),
-  ...
+  highlight = TRUE,
+  margins = c(0, 0, 3, 0),
+  path.lwd = NA,
+  lwd = 1
 )
 }
 \arguments{
@@ -22,44 +22,43 @@ name saved in the \code{metrics} object.}
 
 \item{quadrants}{Should the quadrants be marked on the plot. Default is FALSE}
 
-\item{highlight.interpolated}{Should interpolated sections of the path be
-highlighted (in grey). Default is TRUE.}
-
-\item{highlight.initial}{Should the initial section of the path be
-highlighted (in red). Default is TRUE. This is the section of the path
-equivalent in length to the distance between the start and the goal.}
+\item{highlight}{Should key features of the path be highlighted? Default is
+TRUE. The type of highlight depends on the plot type: For Morris water maze
+and Barnes maze, this will draw the section of the path equivalent in
+length to the distance between the start and the goal in red. For active
+place avoidance, the perimeter of the arena is annotated with a red point
+at the median and a line extending from the lower to the upper quartile.
+For other experiment types, this parameter is currently ignored.}
 
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should normally not need to be
 changed.}
 
-\item{...}{Additional arguments passed to the plot method in the
-\code{\link[sp]{SpatialPolygons-class}} to modify plot details.}
+\item{path.lwd}{The thickness of the line used to draw the path. By default
+this is drawn heavier to make them stand out.}
+
+\item{lwd}{The thickness of the lines used to draw the arena. Default is 1.}
 }
 \description{
-Plots the path together with a representation of the arena. These plots are
-useful for diagnosis of classification problems.
+Plots the path together with a representation of the arena.
 }
 \details{
 The path is plotted together with the context of the arena. The three
 concentric zones of the arena (the wall, outer wall and annulus) are drawn in
 progressively lighter shades of blue. The goal is a filled circle in orange
 and the old goal is drawn in grey. The direct path to goal is shown as a
-broken orange line and the 'approach corridor' (in transparent orange) is
+broken orange line and the "approach corridor" (in transparent orange) is
 defined as a triangle fanning out from this line by 20 degrees either side.
-The path itself is drawn in black with grey sections corresponding to
-interpolated data (if \code{highlight.interpolated = TRUE}, the parameter
-\code{interpolate = TRUE} was set in \code{\link{read_path}} and there were
-missing data points in the raw track file). The initial path (the section of
-the path equivalent in length to the distance between the start and the goal)
-is drawn in red if \code{highlight.initial = TRUE}.
+The path itself is drawn in black with the initial path (the section of the
+path equivalent in length to the distance between the start and the goal)
+drawn in red if \code{highlight = TRUE}.
 }
 \examples{
 require(Rtrack)
-track_file <- system.file("extdata", "Track_1.csv", package = "Rtrack")
-arena_description <- system.file("extdata", "Arena_SW.txt", package = "Rtrack")
+track_file <- system.file("extdata", "Track_1.tab", package = "Rtrack")
+arena_description <- system.file("extdata", "Arena.txt", package = "Rtrack")
 arena <- read_arena(arena_description)
-path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
+path <- read_path(track_file, arena, track.format = "raw.tab")
 metrics <- calculate_metrics(path, arena)
 plot_path(metrics)
 

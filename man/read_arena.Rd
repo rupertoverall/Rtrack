@@ -22,17 +22,19 @@ The user will normally not need to call this function directly. Use
 \code{\link{read_experiment}} instead.
 }
 \details{
-Every path must be accompanied by a description of the 'arena'. This
-description includes arena size, goal coordinates etc. and is unique for
+Every path must be accompanied by a description of the "arena". This
+description includes arena size, goal coordinates etc.{} and is unique for
 every combination of these (i.e. a different arena description file is
 required for goal reversal trials).
 
-The \code{type} parameter specifies the type of arena used. Currently only
-'mwm' (for Morris water maze) is supported but other types will be added in
-the future. For the water maze, this package currently assumes a circular
-pool and circular platforms (the commonly-used square platforms are
+The \code{type} parameter specifies the type of experiment. Current options
+are \code{mwm} (for Morris water maze), \code{barnes} (Barnes maze),
+\code{oft} (open field test), \code{nor} (novel object recognition task) and
+\code{apa} (active place avoidance, also known as the carousel maze). For the
+water maze, Barnes maze and APA, the pool/arena and goal platforms/holes are
+restricted to being circular (the square platforms sometimes used for MWM are
 approximated by a circle of a diameter equal to the width of the square. This
-is because the rotational orientation of square patforms is seldom recorded
+is because the rotational orientation of square platforms is seldom recorded
 (the behaviour of the package regarding this detail may be changed in future
 versions).
 
@@ -48,7 +50,7 @@ reversal) study designs.
 }
 \examples{
 require(Rtrack)
-arena_description <- system.file("extdata", "Arena_SW.txt", package = "Rtrack")
+arena_description <- system.file("extdata", "Arena.txt", package = "Rtrack")
 arena <- read_arena(arena_description)
 
 }

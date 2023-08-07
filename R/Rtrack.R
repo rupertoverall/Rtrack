@@ -1,18 +1,17 @@
 #' Analysis of spatial tracking data and strategy classification.
 #'
-#' A toolkit for the analysis of paths from spatial tracking experiments (such as the
-#' Morris water maze) and calculation of goal-finding strategies. This package is centered
-#' on an approach using machine learning for path classification.
+#' A toolkit for the analysis of paths from spatial tracking experiments (such
+#' as the Morris water maze, Barnes maze and open field among others) and
+#' calculation of goal-finding strategies where appropriate. This package
+#' includes methods for path classification using machine learning.
 #'
 #' @section Functions provided: \code{\link{calculate_metrics}}
-#'
-#'   \code{\link{call_mwm_strategy_garthe}}
 #'
 #'   \code{\link{call_strategy}}
 #'
 #'   \code{\link{check_experiment}}
 #'
-#'   \code{\link{export_json}}
+#'   \code{\link{export_data}}
 #'
 #'   \code{\link{export_results}}
 #'
@@ -37,3 +36,9 @@
 #' @docType package
 #' @name Rtrack
 NULL
+
+.onLoad <- function(...) {
+	registerS3method("print", "rtrack_experiment", print_experiment)
+	registerS3method("print", "rtrack_metrics", print_metrics)
+	registerS3method("print", "rtrack_path", print_path)
+}

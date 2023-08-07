@@ -21,7 +21,7 @@ This package runs on any operating system with R (≥ version 2.10) installed. T
 
 
 ## R dependencies
-Imports: 	crayon, graphics, grDevices, Hmisc, KernSmooth, methods, openxlsx, parallel, pbapply, randomForest, raster, readxl, rgeos, rjson, sp, stats, tools, utils
+Imports: 	crayon, graphics, grDevices, Hmisc, KernSmooth, methods, openxlsx, parallel, pbapply, randomForest, RCurl, readxl, rjson, scales, stats, stringi, terra, tools, utils, zip
 Suggests: 	knitr, rmarkdown
 
 ## Hardware requirements
@@ -34,11 +34,11 @@ Install time is c. 30 s depending on internet connection speed and the number of
 # 3. Demo
 The core functionality can be demonstrated by the following code which downloads an example dataset, processes track metrics, calls strategies and draws a strategy overview plot.
 ```
-experiment = Rtrack::read_experiment("https://rupertoverall.net/Rtrack/Experiment.json", format = "json")
-strategies = Rtrack::call_strategy(experiment$metrics)
-Rtrack::plot_strategies(strategies, experiment = experiment, factor = "Strain", exclude.probe = TRUE)
+experiment = Rtrack::read_experiment("https://rupertoverall.net/Rtrack/examples/MWM_example.trackxf")
+strategies = Rtrack::call_strategy(experiment)
+Rtrack::plot_strategies(strategies, experiment, factor = "Strain", exclude.probe = TRUE)
 ```
-This code takes 23 s to complete on an 3.5 GHz Intel Core i7 MacBook Pro laptop (using only a single CPU core and including download time).
+This code takes 14 s to complete on an M1 MacBook Pro laptop (using only a single CPU core and including download time).
 A detailed walk-through of all functions provided by the package is also available at https://rupertoverall.net/Rtrack/articles/Rtrack_MWM_analysis.html
 
 # 4. Instructions for use

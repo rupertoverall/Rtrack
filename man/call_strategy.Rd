@@ -4,14 +4,17 @@
 \alias{call_strategy}
 \title{Calculation of search strategies.}
 \usage{
-call_strategy(metrics, version = "mouse_rf_6")
+call_strategy(metrics, model = "default")
 }
 \arguments{
 \item{metrics}{An \code{rtrack_metrics} object from
-\code{\link{calculate_metrics}} or a list of such objects.}
+\code{\link{calculate_metrics}}, a list of such objects or an
+\code{rtrack_experiment} object.}
 
-\item{version}{The strategy calling model that should be used. Currently only
-the default \code{mouse_rf_6} is implemented.}
+\item{model}{The strategy calling model that should be used. Default models
+have been implemented for for Morris water maze and Barnes maze
+(\code{mwm_rf_v7} and \code{mb_rf_v1} respectively; both trained on mouse
+data).}
 }
 \value{
 An \code{rtrack_strategies} object. The \code{calls} element contains
@@ -19,17 +22,22 @@ An \code{rtrack_strategies} object. The \code{calls} element contains
   possible strategies.
 }
 \description{
-Calculates Morris water maze strategies from path metrics.
+Calculates search strategies from path metrics.
 }
 \details{
 This function implements a classifier based on a trained random forest model.
+If the \code{model} parameter is left at "default", then the default model
+for the appropriate experiment type will be automatically selected. Please
+note that search strategies are only available for Morris water maze and
+Barnes maze at this stage. It is expected that other models will be added in
+the future and your feedback is welcome.
 }
 \examples{
 require(Rtrack)
-track_file <- system.file("extdata", "Track_1.csv", package = "Rtrack")
-arena_description <- system.file("extdata", "Arena_SW.txt", package = "Rtrack")
+track_file <- system.file("extdata", "Track_1.tab", package = "Rtrack")
+arena_description <- system.file("extdata", "Arena.txt", package = "Rtrack")
 arena <- read_arena(arena_description)
-path <- read_path(track_file, arena, track.format = "ethovision.3.csv")
+path <- read_path(track_file, arena, track.format = "raw.tab")
 metrics <- calculate_metrics(path, arena)
 strategies <- call_strategy(metrics)
 # Inspect the strategy call

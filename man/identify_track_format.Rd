@@ -7,8 +7,9 @@
 identify_track_format(filename = NULL)
 }
 \arguments{
-\item{filename}{A raw data file containing path coordinates. If this is NULL or
-missing, then a message is given listing all of the possible format codes.}
+\item{filename}{A raw data file containing path coordinates. If this is NULL
+or missing, then a message is given listing all of the possible format
+codes.}
 }
 \value{
 The format code as a character string. This code can be used as the
@@ -18,27 +19,27 @@ The format code as a character string. This code can be used as the
 
   If the track format cannot be determined, \code{NA} is returned.
 
-  When run without a \code{filename} parameter, a character vector containing all
-  supported format codes is invisibly returned.
+  When run without a \code{filename} parameter, a character vector containing
+  all supported format codes is invisibly returned.
 }
 \description{
 A helper utility to determine the raw data format.
 }
 \details{
-Raw data from several sources can be read in directly. A number of formats are
-supported, but it might not be clear which format code corresponds to your data. This
-function can be run on a typical file to try to guess your file format. If the format
-is not recognised, please visit the help page at
-\url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to request
-support for new formats.
+Raw data from several sources can be read in directly. A number of formats
+are supported, but it might not be clear which format code corresponds to
+your data. This function can be run on a typical file to try to guess your
+file format. If the format is not recognised, please visit the help page at
+\url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to
+request support for new formats.
 }
 \examples{
 require(Rtrack)
-track_file = system.file("extdata", "Track_1.csv", package = "Rtrack")
+track_file = system.file("extdata", "Track_1.tab", package = "Rtrack")
 identify_track_format(track_file)
 
 }
 \seealso{
-\code{\link{read_path}}, or \code{\link{read_experiment}} to read the track
-  files.
+\code{\link{read_path}}, or \code{\link{read_experiment}} to read
+  the track files.
 }

@@ -1,7 +1,5 @@
-citHeader("To cite Rtrack in publications use:")
-
-citEntry(
-  entry    = "Article",
+bibentry(
+  bibtype    = "Article",
   title    = "Rtrack: a software package for reproducible automated water maze analysis",
   author   = "Rupert W Overall, Sara Zocher, Alexander Garthe, Gerd Kempermann",
   journal  = "bioRxiv",

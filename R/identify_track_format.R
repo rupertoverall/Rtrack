@@ -2,15 +2,16 @@
 #'
 #' A helper utility to determine the raw data format.
 #'
-#' Raw data from several sources can be read in directly. A number of formats are
-#' supported, but it might not be clear which format code corresponds to your data. This
-#' function can be run on a typical file to try to guess your file format. If the format
-#' is not recognised, please visit the help page at
-#' \url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to request
-#' support for new formats.
+#' Raw data from several sources can be read in directly. A number of formats
+#' are supported, but it might not be clear which format code corresponds to
+#' your data. This function can be run on a typical file to try to guess your
+#' file format. If the format is not recognised, please visit the help page at
+#' \url{https://rupertoverall.net/Rtrack/help.html} where it is also possible to
+#' request support for new formats.
 #'
-#' @param filename A raw data file containing path coordinates. If this is NULL or
-#'   missing, then a message is given listing all of the possible format codes.
+#' @param filename A raw data file containing path coordinates. If this is NULL
+#'   or missing, then a message is given listing all of the possible format
+#'   codes.
 #'
 #' @return The format code as a character string. This code can be used as the
 #'   \code{track.format} parameter for \code{\link{read_path}} or in the
@@ -19,15 +20,15 @@
 #'
 #'   If the track format cannot be determined, \code{NA} is returned.
 #'
-#'   When run without a \code{filename} parameter, a character vector containing all
-#'   supported format codes is invisibly returned.
+#'   When run without a \code{filename} parameter, a character vector containing
+#'   all supported format codes is invisibly returned.
 #'
-#' @seealso \code{\link{read_path}}, or \code{\link{read_experiment}} to read the track
-#'   files.
+#' @seealso \code{\link{read_path}}, or \code{\link{read_experiment}} to read
+#'   the track files.
 #'
 #' @examples
 #' require(Rtrack)
-#' track_file = system.file("extdata", "Track_1.csv", package = "Rtrack")
+#' track_file = system.file("extdata", "Track_1.tab", package = "Rtrack")
 #' identify_track_format(track_file)
 #'
 #' @importFrom readxl read_excel
@@ -39,23 +40,26 @@ identify_track_format = function(filename = NULL) {
 	encoding = "UTF-8" # Default = UTF-8
 	if(length(filename) == 0){
 		supported.formats = c(
-		"ethovision.xt.excel",
-		"ethovision.xt.csv",
-		"ethovision.xt.csv2",
-		"ethovision.3.csv",
-		"ethovision.3.csv2",
-		"actimetrics.watermaze.csv",
-		"dsnt.wmdat",
-		"topscan.txt",
-		"anymaze.csv",
-		"anymaze.csv2",
-		"anymaze.tab",
-		"raw.csv",
-		"raw.csv2",
-		"raw.tab",
-		"raw.nh.csv",
-		"raw.nh.csv2",
-		"raw.nh.tab")
+			"raw.csv",
+			"raw.csv2",
+			"raw.tab",
+			"raw.free.csv",
+			"raw.free.csv2",
+			"raw.free.tab",
+			"raw.nh.csv",
+			"raw.nh.csv2",
+			"raw.nh.tab",
+			"ethovision.xt.excel",
+			"ethovision.xt.csv",
+			"ethovision.xt.csv2",
+			"ethovision.3.csv",
+			"ethovision.3.csv2",
+			"actimetrics.watermaze.csv",
+			"topscan.txt",
+			"anymaze.csv",
+			"dsnt.wmdat",
+			"tracker.2.dat"
+		)
 		message(paste(c("Supported formats are:", paste0("   ", supported.formats)), collapse = "\n"))
 		invisible(supported.formats)
 	}else{
@@ -64,7 +68,7 @@ identify_track_format = function(filename = NULL) {
 		testlines = 100 # The number of lines to be tested (make sure this many lines exist)
 		headerlines = 50 # The number of testlines that are allowed to contain non-tabular header information
 		raw = tryCatch({suppressMessages(as.data.frame(readxl::read_excel(filename, col_names = FALSE), stringsAsFactors = FALSE))}, error = function(e){FALSE})
-		if(length(dim(raw)) > 0){
+		if(length(dim(raw)) > 0){   
 			# Looks like a valid Excel document
 			header.lines = as.numeric(raw[grep("header", raw[, 1], ignore.case = TRUE), 2])
 			if(length(header.lines) > 0){ # Probably in Ethovision format
@@ -95,39 +99,50 @@ identify_track_format = function(filename = NULL) {
 				warning("This file has an unknown file encoding.")
 			}
 			suppressWarnings({
-				raw.text = as.matrix(suppressMessages(utils::read.table(filename, nrows = testlines, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = encoding)))
+				raw = as.matrix(suppressMessages(utils::read.table(filename, nrows = testlines, sep = "\n", fill = TRUE, header = FALSE, stringsAsFactors = FALSE, fileEncoding = encoding)))
 			})
 		
 			# Try reading the standard tabular types (from least to most common non-separator characters)
 			# Allow for up to 'headerlines' header lines (there is no way to predict this beforehand)
-			tsv.cols = table(sapply(raw.text[headerlines:testlines], function(s) length(which(gregexpr("\t", s)[[1]] > 0)) + 1 )) 
-			csv2.cols = table(sapply(raw.text[headerlines:testlines], function(s) length(which(gregexpr("\\;", s)[[1]] > 0)) + 1 ))
-			csv.cols = table(sapply(raw.text[headerlines:testlines], function(s) length(which(gregexpr("\\,", s)[[1]] > 0)) + 1 ))
-			if(length(tsv.cols) == 1 & as.numeric(names(tsv.cols)) > 2){ # Minimum 3 columns required for t, x, y
+			tsv.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\t", s)[[1]] > 0)) + 1 )) 
+			csv2.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\\;", s)[[1]] > 0)) + 1 ))
+			csv.cols = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("\\,", s)[[1]] > 0)) + 1 ))
+			posix.points = table(sapply(raw[headerlines:testlines], function(s) length(which(gregexpr("[0-9]\\:[0-9]", s)[[1]] > 0)) + 1 ))
+				
+			if(length(csv.cols) == 1 & as.numeric(names(posix.points)) > 2){ # Anymaze format (with Posix timestamps)
+				# Has tabular data that is tab-separated (with or without headers)
+				# Is this a headerless table of numeric data?
+				raw = utils::read.csv(filename, header = T, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
+				raw$Time = suppressWarnings(as.numeric(strptime(raw$Time, format = "%H:%M:%OS")))
+				if(is.numeric(raw$Time) & is.numeric(raw$Centre.position.X) & is.numeric(raw$Centre.position.Y)){
+					track.format = "anymaze.csv"
+				}
+			}else if(length(tsv.cols) == 1 & as.numeric(names(tsv.cols)) > 2){ # Minimum 3 columns required for t, x, y
 				# Has tabular data that is tab-separated (with or without headers)
 				# Is this a headerless table of numeric data?
 				raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
 				numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
-				if(any(grepl("Time\tCentre\\ pos", raw.text[1:20]))){
-					track.format = "anymaze.tab"
+				if(any(grepl("%%BEGIN_HEADER", raw))  & any(grepl("Tracker version 2", raw))){
+					track.format = "tracker.2.dat"
 				}else if(ncol(raw) >= 3 & numtest.all){
 					track.format = "raw.nh.tab"
 				}else{
 					raw = utils::read.delim(filename, header = T, stringsAsFactors = FALSE, fill = T, fileEncoding = encoding)
 					numtest.all = all(apply(raw[, 1:3], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
-					if(ncol(raw) >= 3 & numtest.all){
+					if(ncol(raw) == 3 & numtest.all){
 						track.format = "raw.tab"
+					}else if(ncol(raw) >= 3 & numtest.all){
+						track.format = "raw.free.tab"
+						message("This format has more than 3 columns. Please make sure that the _first_3_ are 'time', 'x', 'y' in that order.")
 					}
 				}
 			}else if(length(csv2.cols) == 1 & as.numeric(names(csv2.cols)) > 2){ 
 				# Has tabular data that is semicolon-separated (with or without headers)
 				# NOTE that Ethovison XT can use variously "Header Lines:" of "Number of header Lines:", so check for both.
-				if(grepl("header\\ lines", raw.text[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw.text[1:20]))){
+				if(grepl("header\\ lines", raw[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20,]))){
 					track.format = "ethovision.xt.csv2"
-				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw.text[1:20]))){
+				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20,]))){
 					track.format = "ethovision.3.csv2"
-				}else if(any(grepl("Tim;,Centre\\ pos", raw.text[1:20]))){
-					track.format = "anymaze.csv2"
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv2(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
@@ -140,20 +155,21 @@ identify_track_format = function(filename = NULL) {
 						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 						if(ncol(raw) == 3 & numtest.all){
 							track.format = "raw.csv2"
+						}else if(ncol(raw) >= 3 & numtest.all){
+							track.format = "raw.free.csv2"
+							message("This format has more than 3 columns. Please make sure that the _first_3_ are 'time', 'x', 'y' in that order.")
 						}else if(ncol(raw) %% 3 == 0 & numtest.sans){
 							track.format = "actimetrics.watermaze.csv2"
 						}
 					}
 				}
-			}else if(length(csv.cols) == 1 & as.numeric(names(csv.cols)) > 2){
+			}else if(length(csv.cols) == 1 & as.numeric(names(csv.cols)) > 2){ 
 				# Has tabular data that is comma-separated (with or without headers)
-				# NOTE that Ethovison XT can use variously "Header Lines:" or "Number of header Lines:", so check for both.
-				if(grepl("header\\ lines", raw.text[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw.text[1:20]))){
+				# NOTE that Ethovison XT can use variously "Header Lines:" of "Number of header Lines:", so check for both.
+				if(grepl("header\\ lines", raw[1], ignore.case = T) & any(grepl("Experiment|Trial\\ name|Trial\\ ID|Arena\\ name", raw[1:20]))){
 					track.format = "ethovision.xt.csv"
-				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw.text[1:20]))){
+				}else if(any(grepl("Track\\ file|Object|Samples|Goal\\ Position", raw[1:20]))){
 					track.format = "ethovision.3.csv"
-				}else if(any(grepl("Time,Centre\\ pos", raw.text[1:20]))){
-					track.format = "anymaze.csv"
 				}else{
 					# Is this a headerless table of numeric data?
 					raw = utils::read.csv(filename, header = F, row.names = NULL, stringsAsFactors = FALSE, fileEncoding = encoding)
@@ -166,6 +182,9 @@ identify_track_format = function(filename = NULL) {
 						numtest.sans = all(apply(raw[-1, ], 1, function(row) all(grepl("[0-9\\-\\.\\NA\\ ]+", row) | nchar(row) == 0 | is.na(row)) ))
 						if(ncol(raw) == 3 & numtest.all){
 							track.format = "raw.csv"
+						}else if(ncol(raw) >= 3 & numtest.all){
+							track.format = "raw.free.csv"
+							message("This format has more than 3 columns. Please make sure that the _first_3_ are 'time', 'x', 'y' in that order.")
 						}else if(ncol(raw) %% 3 == 0 & numtest.sans){
 							track.format = "actimetrics.watermaze.csv"
 						}
@@ -173,12 +192,12 @@ identify_track_format = function(filename = NULL) {
 				}
 			}else{ # Not a csv or tsv
 				# Check for some known headers
-				if(any(grepl("FrameNum", raw.text) & grepl("CenterX", raw.text))){
+				if(any(grepl("FrameNum", raw) & grepl("CenterX", raw))){
 					# Probably Topscan
-						track.format = "topscan.txt"
-				}else if(any(grepl(":", raw.text[1:4]))){
+					track.format = "topscan.txt"
+				}else if(any(grepl(":", raw[1:4]))){
 					# Probably 'dsnt.wmdat' in which case every 2nd is numeric and every 3rd is a POSIX timestamp (contains':')
-					m = matrix(grepl(":", raw.text[1:(testlines - testlines %% 3)]), nrow = 3)
+					m = matrix(grepl(":", raw[1:(testlines - testlines %% 3)]), nrow = 3)
 					if(!any(m[2, ]) & all(m[3, ])){
 						track.format = "dsnt.wmdat"
 					}

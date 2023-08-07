@@ -1,34 +1,39 @@
 Package: Rtrack
 Type: Package
 Title: Spatial Navigation Strategy Analysis
-Version: 1.0.7
+Version: 2.0.0
 Authors@R: person("Rupert", "Overall", email = "rtrack@rupertoverall.net",
   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3882-6073"))
 Maintainer: Rupert Overall <rtrack@rupertoverall.net>
 URL: https://rupertoverall.net/Rtrack/, https://github.com/rupertoverall/Rtrack
 BugReports: https://github.com/rupertoverall/Rtrack/issues
-Description: A toolkit for the analysis of paths from spatial tracking experiments (such as the Morris water maze) and calculation of goal-finding strategies. 
+Description: A toolkit for the analysis of paths from spatial tracking experiments and calculation of goal-finding strategies. 
     This package is centered on an approach using machine learning for path classification.
 License: GPL-3
 Encoding: UTF-8
+LazyData: true
+LazyDataCompression: xz
 Imports:
     crayon,
     graphics,
     grDevices,
+    Hmisc,
     KernSmooth,
     methods,
     openxlsx,
     parallel,
     pbapply,
     randomForest,
-    raster,
+    RCurl,
     readxl,
-    rgeos,
     rjson,
-    sp,
+    scales,
     stats,
+    stringi,
+    terra,
     tools,
-    utils
-RoxygenNote: 7.2.1
+    utils,
+    zip
+RoxygenNote: 7.2.3
 Depends: R (>= 2.10)
 Suggests: knitr, rmarkdown

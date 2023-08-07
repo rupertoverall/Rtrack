@@ -5,7 +5,7 @@ Rtrack <img src="man/figures/logo.png" align="right" alt="" width="120" />
 The Rtrack package
 -----------------
 
-Rtrack is a package to process raw spatial tracking data (such as from the Morris water maze task) and calculate behavioural strategies. The strategy analysis is performed in a parameter-free manner using pre-trained machine learning models. This makes analysis both fast and reproducible. In addition, the package includes several plotting functions, tools to aid advanced analysis, and export functions for results and raw data.
+Rtrack is a package to process raw spatial tracking data (such as from the Morris water maze or open field tests) and calculate behavioural strategies. The strategy analysis is performed in a parameter-free manner using pre-trained machine learning models. This makes analysis both fast and reproducible. In addition, the package includes several plotting functions, tools to aid advanced analysis, and export functions for results and raw data.
 
 The export of raw data in a standardised format allows complete experiments to be archived and shared.
 
@@ -18,10 +18,7 @@ The package is available from the [CRAN repository](https://cran.r-project.org/p
 install.packages("Rtrack") 
 ```
 
-\* If you encounter problems, please look at the [installation notes](https://rupertoverall.net/Rtrack/articles/Rtrack_install_page.html).
-
-
 Getting started
 ----------------------------------------------------------------------------------------------------------------
 
-To get started using Rtrack, it is recommended to visit the package website at [https://rupertoverall.net/Rtrack](https://rupertoverall.net/Rtrack)
+To get started using Rtrack, it is recommended to work through the [tutorials](articles/Rtrack_tutorials_page.html)
