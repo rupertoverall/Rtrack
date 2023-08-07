@@ -21,4 +21,4 @@ install.packages("Rtrack")
 Getting started
 ----------------------------------------------------------------------------------------------------------------
 
-To get started using Rtrack, it is recommended to work through the [tutorials](articles/Rtrack_tutorials_page.html)
+To get started using Rtrack, it is recommended to work through the [tutorials](https://rupertoverall.net/Rtrack/articles/Rtrack_tutorials_page.html)

@@ -39,7 +39,7 @@ strategies = Rtrack::call_strategy(experiment)
 Rtrack::plot_strategies(strategies, experiment, factor = "Strain", exclude.probe = TRUE)
 ```
 This code takes 14 s to complete on an M1 MacBook Pro laptop (using only a single CPU core and including download time).
-A detailed walk-through of all functions provided by the package is also available at https://rupertoverall.net/Rtrack/articles/Rtrack_MWM_analysis.html
+A detailed walk-through of all functions provided by the package is also available at https://rupertoverall.net/Rtrack/articles/Rtrack_tutorials_page.html
 
 # 4. Instructions for use
-The online tutorial at https://rupertoverall.net/Rtrack/articles/Rtrack_MWM_analysis.html provides step-by-step instructions for running the software and details on how to prepare raw data for analysis.
+The online tutorials https://rupertoverall.net/Rtrack/articles/Rtrack_tutorials_page.html provide step-by-step instructions for running the software and details on how to prepare raw data for analysis.
