@@ -108,14 +108,14 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 			if(!is.null(metrics$arena$zones$goal)) graphics::segments(metrics$path$x[1], metrics$path$y[1], metrics$arena$goal$x, metrics$arena$goal$y, lty = 3, lwd = path.lwd, col = "#F0A020F0")
 			terra::plot(metrics$arena$zones$arena, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "oft"){
-			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
 			terra::plot(metrics$arena$zones$centre, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$wall, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$corner, col = "#C0E0FFFF", add = T, border = NA)
 			graphics::lines(metrics$path$x, metrics$path$y, lwd = path.lwd, col = "#000000FF", xpd = NA)
 			terra::plot(metrics$arena$zones$field, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "nor"){
-			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
 			terra::plot(metrics$arena$zones$wall, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$corner, col = "#C0E0FFFF", add = T, border = NA)
 			if(!metrics$arena$novel$object.1){

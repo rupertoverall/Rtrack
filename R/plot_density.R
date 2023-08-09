@@ -48,7 +48,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 	if(methods::is(metrics, 'rtrack_metrics')){
 		if(is.null(title)) title = metrics$id
 		type = metrics$arena$description$type
-			metrics$arena$zones = lapply(metrics$arena$zones, terra::unwrap) # Deserialise arena zones.
+		metrics$arena$zones = lapply(metrics$arena$zones, terra::unwrap) # Deserialise arena zones.
 	}else if(methods::is(metrics[[1]], 'rtrack_metrics')){
 		if(is.null(title)) title = "Multiple paths"
 		types = table(sapply(metrics, function(m) m$arena$description$type ))
@@ -196,7 +196,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			terra::plot(plot.arena, lwd = lwd, axes = FALSE, add = T)
 		}
@@ -242,7 +242,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.object.1)) terra::plot(plot.object.1, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.object.2)) terra::plot(plot.object.2, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -299,16 +299,27 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 	}else{
 		stop(paste0("The arena type '", type, "' is not supported."))
 	}
-	
+
 	if(legend){
-		width = 1 / 10
-		height = 1 / length(col) *.75
-		x1 = rep(1, length(col)) - width / 2
-		x2 = rep(1, length(col))
-		y1 = seq(.4, 1.1, length.out = length(col))
-		y2 = y1 - height
-		graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
-		graphics::rect(x1, .4, x2, 1.1, xpd = NA)
+		if(type %in% c("oft", "nor")){ # The square arenas are plotted slightly inset to make space for the legend.
+			width = 1 / 10
+			height = 1.1 / length(col) *.75
+			x1 = rep(1.1, length(col)) - width / 2
+			x2 = rep(1.1, length(col))
+			y1 = seq(.44, 1.21, length.out = length(col))
+			y2 = y1 - height
+			graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
+			graphics::rect(x1, .44, x2, 1.21, xpd = NA)
+		}else{
+			width = 1 / 10
+			height = 1 / length(col) *.75
+			x1 = rep(1, length(col)) - width / 2
+			x2 = rep(1, length(col))
+			y1 = seq(.4, 1.1, length.out = length(col))
+			y2 = y1 - height
+			graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
+			graphics::rect(x1, .4, x2, 1.1, xpd = NA)
+		}
 	}
 	
 	if(valid){
