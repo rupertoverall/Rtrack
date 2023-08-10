@@ -219,9 +219,9 @@ calculate_barnes_metrics = function(path, arena){
 	
 	# Was the actual goal/old goal reached at all?
 	goal.reached = NA
-	if(goal.present) goal.reached = any(in.zones$goal.vicinity)
+	if(goal.present) goal.reached = any(tail(in.zones$goal.vicinity))
 	old.goal.reached = NA
-	if(old.goal.present) old.goal.reached = any(in.zones$old.goal.vicinity)
+	if(old.goal.present) old.goal.reached = any(tail(in.zones$old.goal.vicinity))
 	
 	velocity.quantile = unname(stats::quantile(velocity, na.rm = TRUE))
 	d.centroid.quantile = unname(stats::quantile(d.centroid, na.rm = TRUE))

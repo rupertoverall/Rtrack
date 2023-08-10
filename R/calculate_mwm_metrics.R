@@ -148,11 +148,11 @@ calculate_mwm_metrics = function(path, arena){
 	if(!goal.present) zone.crossings$goal = NA
 	if(!old.goal.present) zone.crossings$old.goal = NA
 	
-	# Was the goal/old goal reached at all?
+	# Was the goal/old goal reached at all? Only look at where the subject _ended_ its path.
 	goal.reached = NA
-	if(goal.present) goal.reached = any(in.zones$goal)
+	if(goal.present) goal.reached = any(tail(in.zones$goal))
 	old.goal.reached = NA
-	if(old.goal.present) old.goal.reached = any(in.zones$old.goal)
+	if(old.goal.present) old.goal.reached = any(tail(in.zones$old.goal))
 	
 	velocity.quantile = unname(stats::quantile(velocity, na.rm = TRUE))
 	d.centroid.quantile = unname(stats::quantile(d.centroid, na.rm = TRUE))
