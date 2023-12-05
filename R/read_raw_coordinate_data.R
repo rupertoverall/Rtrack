@@ -137,7 +137,8 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			ncols = max(sapply(tail(raw), function(s) length(strsplit(s, "\\s")[[1]]) ))
 			raw = utils::read.table(filename, header = F, stringsAsFactors = FALSE, col.names = seq_len(ncols), fill = TRUE, fileEncoding = track.encoding)
 			# Check the frame rate and catch missing or not found values
-			frame.rate = c(as.numeric(strsplit(paste0(raw[which(grepl("Frame", raw[, 1], ignore.case = TRUE) & grepl("Rate", raw[, 2], ignore.case = TRUE)), ], collapse = ""), "\\:")[[1]][2]), 0)[1]   
+			frame.string = paste0(raw[which(grepl("Frame", raw[, 1], ignore.case = TRUE) & grepl("Rate", raw[, 2], ignore.case = TRUE)), ], collapse = "")
+			frame.rate = c(as.numeric(gsub("[^0-9.]", "", frame.string)), 0)[1]   
 			frame.rate = ifelse(!is.na(frame.rate), frame.rate, 1) # In fps or default to units if no other information available
 			header.col = grep("CenterX", raw, ignore.case = TRUE)
 			header.lines = grep("CenterX", raw[, header.col], ignore.case = TRUE) + 1
