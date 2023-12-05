@@ -88,11 +88,11 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 				this.old.goal = terra::unwrap(metrics[[i]]$arena$zones$old.goal)
 				if(plot.arena.id != this.arena.id){
 					same.arena = FALSE
-					plot.arena = terra::union(plot.arena, this.arena)
+					plot.arena = terra::union(this.arena, plot.arena)
 					if(is(plot.arena, "list")) plot.arena = plot.arena[[1]]
-					plot.goal = terra::union(plot.goal, this.goal)
+					plot.goal = terra::union(this.goal, plot.goal)
 					if(is(plot.goal, "list")) plot.goal = plot.goal[[1]]
-					plot.old.goal = terra::union(plot.old.goal, this.goal)
+					plot.old.goal = terra::union(this.old.goal, plot.old.goal)
 					if(is(plot.old.goal, "list")) plot.old.goal = plot.old.goal[[1]]
 				}
 			}
@@ -112,7 +112,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.goal)) terra::plot(plot.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.goal)) terra::plot(plot.old.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -136,11 +136,11 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 				this.old.goal = terra::unwrap(metrics[[i]]$arena$zones$old.goal)
 				if(plot.arena.id != this.arena.id){
 					same.arena = FALSE
-					plot.arena = terra::union(plot.arena, this.arena)
+					plot.arena = terra::union(this.arena, plot.arena)
 					if(is(plot.arena, "list")) plot.arena = plot.arena[[1]]
-					plot.goal = terra::union(plot.goal, this.goal)
+					plot.goal = terra::union(this.goal, plot.goal)
 					if(is(plot.goal, "list")) plot.goal = plot.goal[[1]]
-					plot.old.goal = terra::union(plot.old.goal, this.old.goal)
+					plot.old.goal = terra::union(this.old.goal, plot.old.goal)
 					if(is(plot.old.goal, "list")) plot.old.goal = plot.old.goal[[1]]
 				}
 			}
@@ -160,7 +160,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.goal)) terra::plot(plot.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.goal)) terra::plot(plot.old.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -178,7 +178,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 				this.arena.id = metrics[[i]]$arena$id
 				if(plot.arena.id != this.arena.id){
 					same.arena = FALSE
-					plot.arena = terra::union(plot.arena, this.arena)
+					plot.arena = terra::union(this.arena, plot.arena)
 					if(is(plot.arena, "list")) plot.arena = plot.arena[[1]]
 				}
 			}
@@ -196,7 +196,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			terra::plot(plot.arena, lwd = lwd, axes = FALSE, add = T)
 		}
@@ -218,11 +218,11 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 				this.object.2 = terra::unwrap(metrics[[i]]$arena$zones$object.2)
 				if(plot.arena.id != this.arena.id){
 					same.arena = FALSE
-					plot.arena = terra::union(plot.arena, this.arena)
+					plot.arena = terra::union(this.arena, plot.arena)
 					if(is(plot.arena, "list")) plot.arena = plot.arena[[1]]
-					plot.object.1 = terra::union(plot.object.1, this.object.1)
+					plot.object.1 = terra::union(this.object.1, plot.object.1)
 					if(is(plot.object.1, "list")) plot.object.1 = plot.object.1[[1]]
-					plot.object.2 = terra::union(plot.object.2, this.object.2)
+					plot.object.2 = terra::union(this.object.2, plot.object.2)
 					if(is(plot.object.2, "list")) plot.object.2 = plot.object.2[[1]]
 				}
 			}
@@ -242,7 +242,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.object.1)) terra::plot(plot.object.1, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.object.2)) terra::plot(plot.object.2, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -266,11 +266,11 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 				this.old.aversive = terra::unwrap(metrics[[i]]$arena$zones$old.aversive)
 				if(plot.arena.id != this.arena.id){
 					same.arena = FALSE
-					plot.arena = terra::union(plot.arena, this.arena)
+					plot.arena = terra::union(this.arena, plot.arena)
 					if(is(plot.arena, "list")) plot.arena = plot.arena[[1]]
-					plot.aversive = terra::union(plot.aversive, this.aversive)
+					plot.aversive = terra::union(this.aversive, plot.aversive)
 					if(is(plot.aversive, "list")) plot.aversive = plot.aversive[[1]]
-					plot.old.aversive = terra::union(plot.old.aversive, this.old.aversive)
+					plot.old.aversive = terra::union(this.old.aversive, plot.old.aversive)
 					if(is(plot.old.aversive, "list")) plot.old.aversive = plot.old.aversive[[1]]
 				}
 			}
@@ -290,7 +290,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.aversive)) terra::plot(plot.aversive, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.aversive)) terra::plot(plot.old.aversive, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -320,10 +320,6 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
 			graphics::rect(x1, .4, x2, 1.1, xpd = NA)
 		}
-	}
-	
-	if(valid){
-		title(main = title, line = 1)
 	}
 	
 }
