@@ -569,14 +569,16 @@ read_arena = function(filename, description = NULL){
 		centre = list(x = 0, y = 0, radius = centre.radius, shape = "circle")
 		wall.radius = field$radius * 0.6 # Wall zone width is 20 % of arena diameter.
 		wall = list(x = 0, y = 0, outer.radius = field$radius, inner.radius = wall.radius, shape = "circle")
+		aversive.centre = as.numeric(raw.aversive.zone[2])
+		aversive.width = as.numeric(raw.aversive.zone[3])
 		aversive.zone = list(
 			shape = as.character(raw.aversive.zone[1]),
 			x = 0, 
 			y = 0, 
 			start.radius = ifelse(length(raw.aversive.zone) == 5, as.numeric(raw.aversive.zone[4]) / correction$r, 0),
 			end.radius = ifelse(length(raw.aversive.zone) == 5, as.numeric(raw.aversive.zone[5]) / correction$r, 1),
-			start.angle = as.numeric(raw.aversive.zone[2]),
-			end.angle = as.numeric(raw.aversive.zone[3])
+			start.angle = (aversive.centre - (aversive.width / 2)) %% 360,
+			end.angle = (aversive.centre + (aversive.width / 2)) %% 360
 		)
 		old.aversive.zone = list(
 			shape = as.character(raw.old.aversive.zone[1]),
