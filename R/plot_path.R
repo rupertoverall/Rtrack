@@ -58,7 +58,7 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 		metrics$arena$zones = lapply(metrics$arena$zones, terra::unwrap) # Deserialise arena zones.
 		
 		if(metrics$arena$description$type == "mwm"){
-			terra::plot(metrics$arena$zones$pool, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(metrics$arena$zones$pool, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			terra::plot(metrics$arena$zones$wall, lwd = path.lwd, col = "#C0E0FFFF", add = T, border = NA)
 			terra::plot(metrics$arena$zones$far.wall, lwd = path.lwd, col = "#C0E0FFA0", add = T, border = NA)
 			terra::plot(metrics$arena$zones$annulus, lwd = path.lwd, col = "#C0E0FF40", add = T, border = NA)
@@ -82,7 +82,7 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 			if(!is.null(metrics$arena$zones$goal)) graphics::segments(metrics$path$x[1], metrics$path$y[1], metrics$arena$goal$x, metrics$arena$goal$y, lty = 3, lwd = path.lwd, col = "#F0A020F0")
 			terra::plot(metrics$arena$zones$pool, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "barnes"){
-			terra::plot(metrics$arena$zones$arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(metrics$arena$zones$arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			terra::plot(metrics$arena$zones$annulus, lwd = path.lwd, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$centre, lwd = path.lwd, col = "#C0E0FF80", add = T, border = NA)
 			if(quadrants){
@@ -108,14 +108,14 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 			if(!is.null(metrics$arena$zones$goal)) graphics::segments(metrics$path$x[1], metrics$path$y[1], metrics$arena$goal$x, metrics$arena$goal$y, lty = 3, lwd = path.lwd, col = "#F0A020F0")
 			terra::plot(metrics$arena$zones$arena, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "oft"){
-			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
+			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
 			terra::plot(metrics$arena$zones$centre, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$wall, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$corner, col = "#C0E0FFFF", add = T, border = NA)
 			graphics::lines(metrics$path$x, metrics$path$y, lwd = path.lwd, col = "#000000FF", xpd = NA)
 			terra::plot(metrics$arena$zones$field, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "nor"){
-			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1))
+			terra::plot(metrics$arena$zones$field, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
 			terra::plot(metrics$arena$zones$wall, col = "#C0E0FF80", add = T, border = NA)
 			terra::plot(metrics$arena$zones$corner, col = "#C0E0FFFF", add = T, border = NA)
 			if(!metrics$arena$novel$object.1){
@@ -133,7 +133,7 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 			graphics::lines(metrics$path$x, metrics$path$y, lwd = path.lwd, col = "#000000FF", xpd = NA)
 			terra::plot(metrics$arena$zones$field, lwd = path.lwd, border = "#606060FF", add = T)
 		}else if(metrics$arena$description$type == "apa"){
-			terra::plot(metrics$arena$zones$arena, lwd = lwd, mar = margins, axes = FALSE)
+			terra::plot(metrics$arena$zones$arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
 			# Make an arc for the angle-from-aversive. If no aversive, then ignore (NOT from old.aversive).
 			if(!is.null(metrics$arena$zones$aversive.zone)){
 				midaversive = (((metrics$arena$aversive.zone$end.angle + 360) + (metrics$arena$aversive.zone$start.angle + 360)) / 2) %% 360
@@ -166,7 +166,7 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 					metrics$arena$zones$arena
 				)
 				if(!is.null(metrics$arena$zones$aversive.zone)) terra::plot(sector, col = "#FF6000FF", add = T, border = NA, xpd = NA)
-				if(!is.null(metrics$arena$zones$aversive.zone)) 	points(x = sin(deg2rad(mid.angle)) * 1.01, y = cos(deg2rad(mid.angle)) * 1.01, pch = 20, cex = 1.5 * path.lwd, col = "#FF6000FF", xpd = NA)
+				if(!is.null(metrics$arena$zones$aversive.zone)) points(x = sin(deg2rad(mid.angle)) * 1.01, y = cos(deg2rad(mid.angle)) * 1.01, pch = 20, cex = 1.5 * path.lwd, col = "#FF6000FF", xpd = NA)
 			}
 			# Plot rest of arena and path.
 			terra::plot(metrics$arena$zones$wall, lwd = path.lwd, col = "#C0E0FFA0", add = T, border = NA)
@@ -180,7 +180,7 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 			if(!is.null(metrics$arena$zones$aversive.zone)) terra::plot(metrics$arena$zones$aversive.zone, col = "#D0A00080", add = T)
 			if(!is.null(metrics$arena$zones$old.aversive.zone)) terra::plot(metrics$arena$zones$old.aversive.zone, col = "#80808080", add = T)
 			graphics::lines(metrics$path$x, metrics$path$y, lwd = path.lwd, col = "#000000FF", xpd = NA)
-			terra::plot(metrics$arena$zones$arena, lwd = path.lwd, border = "#606060FF", add = T)
+			terra::plot(metrics$arena$zones$arena, lwd = path.lwd, border = "#606060FF", add = T, main = title, xpd = NA)
 
 			# Add an arrow for direction of rotation.
 			lines(x = sin(deg2rad(-26:-64)) * 1.1, y = cos(deg2rad(-26:-64)) * 1.1, lwd = 1.5 * path.lwd, col = "#A0A0A0FF", xpd = NA)
@@ -202,7 +202,6 @@ plot_path = function(metrics, title = NULL, quadrants = FALSE, highlight = TRUE,
 				)
 			}
 		}
-		title(main = title, line = 1, xpd = NA)
 
 		invisible()
 	}else{
