@@ -70,3 +70,8 @@ print_path = function(path){
 	}
 }
 
+.onLoad = function(...) {
+	registerS3method("print", "rtrack_experiment", print_experiment)
+	registerS3method("print", "rtrack_metrics", print_metrics)
+	registerS3method("print", "rtrack_path", print_path)
+}
