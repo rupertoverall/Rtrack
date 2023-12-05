@@ -210,7 +210,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 
 	# For each time block ('trial'), plot the y values for each group side-by-side.
 	ti = as.numeric(unique(plotting.data$trial.index))
-	gi = plot.levels
+	gi = names(plot.series)
 	step = 1 / length(gi)
 
 	grouped.values = setNames(lapply(gi, function(g){
