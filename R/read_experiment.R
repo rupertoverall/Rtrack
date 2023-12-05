@@ -93,7 +93,7 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 	tempdir = tempdir()
 	if(RCurl::url.exists(filepath)){ # From a URL, only an archive can be read.
 		tempfile = file.path(tempdir, filename)
-		utils::download.file(filepath, tempfile)
+		utils::download.file(filepath, tempfile, method = "libcurl", mode = "wb")
 		filepath = tempfile
 	}else{ # On local filesystem
 		if(is.na(project.dir)) project.dir = dirname(filepath)
