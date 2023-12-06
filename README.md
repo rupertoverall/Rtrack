@@ -12,10 +12,15 @@ The export of raw data in a standardised format allows complete experiments to b
 Install
 -----------------------------------------------------------------------------------------------------------
 
-The package is available from the [CRAN repository](https://cran.r-project.org/package=Rtrack). To install it, run the following lines in [R](https://www.r-project.org/).
+The package is available from the [CRAN repository](https://cran.r-project.org/package=Rtrack). To install it (currently version 2.0.2), run the following line in [R](https://www.r-project.org/).
 
 ``` r
 install.packages("Rtrack") 
+```
+This github repository contains the development version with the latest features and bug fixes. To install this version (2.0.2.2), run the following line in [R](https://www.r-project.org/) (you will need to have the [remotes](https://CRAN.R-project.org/package=remotes) already installed.
+
+``` r
+remotes::install_github("rupertoverall/Rtrack") 
 ```
 
 Getting started
