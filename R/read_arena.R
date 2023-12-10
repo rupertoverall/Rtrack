@@ -113,7 +113,8 @@ read_arena = function(filename, description = NULL){
 			t = as.numeric(description$time.units),
 			x = as.numeric(raw.pool[2]),
 			y =  as.numeric(raw.pool[3]),
-			r = as.numeric(raw.pool[4])
+			r = as.numeric(raw.pool[4]),
+			a = c(as.numeric(description$angle), 0)[1]
 		)
 		pool = list(x = 0, y = 0, radius = 1, shape = "circle") # Defined as unit size.
 		if(!is.null(description$goal)){
@@ -123,6 +124,11 @@ read_arena = function(filename, description = NULL){
 				y = (as.numeric(raw.goal[3]) - correction$y) / correction$r, 
 				radius = as.numeric(raw.goal[4]) / correction$r
 			)
+			if(correction$a != 0){
+				spun = spin(goal$x, goal$y, deg2rad(correction$a))
+				goal$x = spun$x
+				goal$y = spun$y
+			}
 		}
 		if(!is.null(description$old.goal)){
 			old.goal = list(
@@ -131,6 +137,11 @@ read_arena = function(filename, description = NULL){
 				y = (as.numeric(raw.old.goal[3]) - correction$y) / correction$r, 
 				radius = as.numeric(raw.old.goal[4]) / correction$r
 			)
+			if(correction$a != 0){
+				spun = spin(old.goal$x, old.goal$y, deg2rad(correction$a))
+				old.goal$x = spun$x
+				old.goal$y = spun$y
+			}
 		}
 
 		# Annulus is ring defined by goal bounds.
@@ -217,6 +228,7 @@ read_arena = function(filename, description = NULL){
 			x = as.numeric(raw.field[2]),
 			y =  as.numeric(raw.field[3]),
 			r = as.numeric(raw.field[4]),
+			a = c(as.numeric(description$angle), 0)[1],
 			e = list(
 				n.holes = as.numeric(n.holes)
 			)
@@ -230,6 +242,11 @@ read_arena = function(filename, description = NULL){
 				y = (as.numeric(raw.goal[3]) - correction$y) / correction$r, 
 				radius = as.numeric(raw.goal[4]) / correction$r
 			)
+			if(correction$a != 0){
+				spun = spin(goal$x, goal$y, deg2rad(correction$a))
+				goal$x = spun$x
+				goal$y = spun$y
+			}
 		}
 		if(!is.null(description$old.goal)) {
 			old.goal = list(
@@ -238,6 +255,11 @@ read_arena = function(filename, description = NULL){
 				y = (as.numeric(raw.old.goal[3]) - correction$y) / correction$r, 
 				radius = as.numeric(raw.old.goal[4]) / correction$r
 			)
+			if(correction$a != 0){
+				spun = spin(goal$x, goal$y, deg2rad(correction$a))
+				goal$x = spun$x
+				goal$y = spun$y
+			}
 		}
 		
 		centre.radius = field$radius * 0.2 # Centre zone radius is 10 % of arena diameter.
@@ -251,6 +273,11 @@ read_arena = function(filename, description = NULL){
 				hole.centre.x[i] = (as.numeric(def[2]) - correction$x) / correction$r
 				hole.centre.y[i] = (as.numeric(def[3]) - correction$y) / correction$r
 				hole.radius[i] = as.numeric(def[4]) / correction$r
+				if(correction$a != 0){
+					spun = spin(hole.centre.x[i], hole.centre.y[i], deg2rad(correction$a))
+					hole.centre.x[i] = spun$x
+					hole.centre.y[i] = spun$y
+				}
 			}
 		}else{ # 'n.holes' equally-spaced holes need to be generated.
 			def = unlist(strsplit(description$holes, "\\s+"))[-1]
@@ -264,6 +291,11 @@ read_arena = function(filename, description = NULL){
 			hole.centre.x = hole.centre.radius * sin(hole.centre.angles)
 			hole.centre.y = hole.centre.radius * cos(hole.centre.angles)
 			hole.radius = rep(hole.radius, n.holes)
+			if(correction$a != 0){
+				spun = spin(hole.centre.x[i], hole.centre.y[i], deg2rad(correction$a))
+				hole.centre.x[i] = spun$x
+				hole.centre.y[i] = spun$y
+			}
 		}
 		# The annulus is a ring centred on the arena centre and containing  all holes plus a 5 % buffer either side (clipped by the arena bounds of course).
 		hole.centre.radius = sqrt(hole.centre.x ^ 2 + hole.centre.y ^ 2)
@@ -290,11 +322,11 @@ read_arena = function(filename, description = NULL){
 		# The 'vicinity' buffer is added because animals do not _enter_ the holes, but rather investigate from the edge and centre-of-mass tracking will place them outside the actual target.
 		if(!is.null(description$goal)){
 			arena$zones$goal = terra::vect(circle(goal$x, goal$y, goal$radius), type = "polygons", crs = "local")
-			arena$zones$goal.vicinity = terra::buffer(arena$zones$goal, 0.05)
+			arena$zones$goal.vicinity = terra::buffer(arena$zones$goal, 0.05, quadsegs = 90)
 		}
 		if(!is.null(description$old.goal)){
 			arena$zones$old.goal = terra::vect(circle(old.goal$x, old.goal$y, old.goal$radius), type = "polygons", crs = "local")
-			arena$zones$old.goal.vicinity = terra::buffer(arena$zones$old.goal, 0.05)
+			arena$zones$old.goal.vicinity = terra::buffer(arena$zones$old.goal, 0.05, quadsegs = 90)
 		}
 		# Add individual holes (for counting unique visits) and then combine with the arena.
 		holes = setNames(lapply(seq_len(n.holes), function(n){
@@ -302,10 +334,10 @@ read_arena = function(filename, description = NULL){
 		}), paste0("hole_", seq_len(n.holes)))
 		# Add separate vicinities.
 		hole.vicinities = setNames(lapply(seq_len(n.holes), function(n){
-			terra::buffer(holes[[n]], 0.05)
+			terra::buffer(holes[[n]], 0.05, quadsegs = 90)
 		}), paste0("hole_", seq_len(n.holes), "_vicinity"))
 		arena$zones = c(arena$zones, holes, hole.vicinities)
-		arena$zones$hole.vicinity = terra::buffer(Reduce(terra::union, holes), 0.05)
+		arena$zones$hole.vicinity = terra::buffer(Reduce(terra::union, holes), 0.05, quadsegs = 90)
 		# Add special zones for goal-adjacent holes.
 		if(!is.null(description$goal)){
 			adjacency.to.goal = order(sqrt((hole.centre.x - goal$x) ^ 2 + (hole.centre.y - goal$y) ^ 2), decreasing = FALSE)
@@ -363,6 +395,7 @@ read_arena = function(filename, description = NULL){
 			x4 = raw.coordinates[4, "x"],
 			y4 = raw.coordinates[4, "y"],
 			r = standardised_radius_square(raw.coordinates),
+			a = c(as.numeric(description$angle), 0)[1],
 			model = transform.model
 		)
 		field = list(x = 0, y = 0, radius = 1, shape = "square") # Defined as unit size ('radius' is 1/2 width)
@@ -410,6 +443,7 @@ read_arena = function(filename, description = NULL){
 			x4 = raw.coordinates[4, "x"],
 			y4 = raw.coordinates[4, "y"],
 			r = standardised_radius_square(raw.coordinates),
+			a = c(as.numeric(description$angle), 0)[1],
 			model = transform.model
 		)
 		field = list(x = 0, y = 0, radius = 1, shape = "square") # Defined as unit size ('radius' is 1/2 width)
@@ -501,8 +535,8 @@ read_arena = function(filename, description = NULL){
 		# Test that object zones are valid. If not, then the following operations can crash R.
 		if(!is.na(sum(range(terra::ext(arena$zones$object.1)))) & !is.na(sum(range(terra::ext(arena$zones$object.2))))){
 			## Create a region surrounding the objects
-			object.1.vicinity = terra::buffer(arena$zones$object.1, object.vicinity.width)
-			object.2.vicinity = terra::buffer(arena$zones$object.2, object.vicinity.width)
+			object.1.vicinity = terra::buffer(arena$zones$object.1, object.vicinity.width, quadsegs = 90)
+			object.2.vicinity = terra::buffer(arena$zones$object.2, object.vicinity.width, quadsegs = 90)
 			# Erase any overlap between the object buffers and clip to field.
 			arena$zones$object.1.vicinity =  terra::intersect(
 				terra::erase(
@@ -526,7 +560,7 @@ read_arena = function(filename, description = NULL){
 		}
 		# Create a new zone including all/any objects.
 		arena$zones$object = terra::union(object.1.vicinity, object.2.vicinity)
-		arena$zones$object.vicinity = terra::buffer(arena$zones$object, object.vicinity.width)
+		arena$zones$object.vicinity = terra::buffer(arena$zones$object, object.vicinity.width, quadsegs = 90)
 		#
 		# Create a new zone including all/any novel objects. This may be empty.
 		if(object.1.is.novel | object.2.is.novel){
@@ -536,7 +570,7 @@ read_arena = function(filename, description = NULL){
 				arena$zones$object.2,		 
 				terra::union(object.1.vicinity, object.2.vicinity)
 			)
-			arena$zones$novel.object.vicinity = terra::buffer(arena$zones$novel.object, object.vicinity.width)
+			arena$zones$novel.object.vicinity = terra::buffer(arena$zones$novel.object, object.vicinity.width, quadsegs = 90)
 		}
 		#
 		arena$novel$object.1 = object.1.is.novel
@@ -559,6 +593,7 @@ read_arena = function(filename, description = NULL){
 			x = as.numeric(raw.arena[2]),
 			y =  as.numeric(raw.arena[3]),
 			r = as.numeric(raw.arena[4]),
+			a = c(as.numeric(description$angle), 0)[1],
 			e = list(
 				arena.rotation = as.numeric(raw.reference.rotation)
 			)
@@ -652,7 +687,7 @@ read_arena = function(filename, description = NULL){
 			)
 		}
 		
-		# Quadrants are defined such that the entre of the aversive zone is in centre of the north quadrant (by definition straight upwards on the page).
+		# Quadrants are defined such that the centre of the aversive zone is in centre of the north quadrant (by definition straight upwards on the page).
 		aversive.zone.angle = deg2rad((aversive.zone$start.angle %% 360 + aversive.zone$end.angle %% 360) / 2)
 		if(is.na(aversive.zone.angle)) aversive.zone.angle = deg2rad((old.aversive.zone$start.angle %% 360 + old.aversive.zone$end.angle %% 360) / 2)
 		n.point = c(x = sin(aversive.zone.angle - pi * 0.25), y = cos(aversive.zone.angle - pi * 0.25))
