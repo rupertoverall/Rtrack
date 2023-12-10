@@ -13,38 +13,50 @@ read_mwm_path = function(filename, arena, id, track.format, track.index, interpo
 	path$x = ((path$raw.x - arena$correction$x) / arena$correction$r)[!missing]
 	path$y = ((path$raw.y - arena$correction$y) / arena$correction$r)[!missing]
 	
+	# 1.2. Rotate to match arena.
+	angle = arena$correction$a
+	if(angle != 0){
+		rotated.points = spin(path$x, path$y, deg2rad(angle))
+		path$x = rotated.points$x
+		path$y = rotated.points$y
+	}
+	
 	if(interpolate){
 		if(!all(missing)){ # If track is empty, then interpolation won't help (and will only crash)
 			field = terra::unwrap(arena$zones$pool)
 			# 2. Remove any points falling outside the arena
 			pathpoints = terra::vect(cbind(x = path$x, y = path$y), type = "points", crs = "local")
 			clipped = !as.logical(terra::relate(pathpoints, field, relation = "intersects"))
-			if(any(clipped)){
-				path$t = path$t[!clipped]
-				path$x = path$x[!clipped]
-				path$y = path$y[!clipped]
-				warning(paste0("For '", id, "', some points on the path were outside the arena bounds. These have been removed."))
-			}
-			# 3. Outlier removal is no longer done for MWM
-			# 4. Check the timestamps for any missing intervals in the raw data
-			timestep = stats::median(diff(path$t), na.rm = T) 
-			new.t = seq(path$t[1], utils::tail(path$t, 1), timestep)
-			# 5. Replace missing and clipped points by interpolated/extrapolated values
-			path$x = Hmisc::approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
-			path$y = Hmisc::approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
-			path$t = new.t
-			# 6. Fix any overzealous extrapolation by bounding to the arena
-			pathpoints = terra::vect(cbind(x = path$x, y = path$y), type = "points", crs = "local")
-			clipped = !as.logical(terra::relate(pathpoints, field, relation = "intersects"))
-			if(any(clipped)){
-				path$x[clipped] = NA
-				path$y[clipped] = NA
-				path$x = stats::approx(path$t, path$x, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
-				path$y = stats::approx(path$t, path$y, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
+			if(all(clipped)){
+				warning(paste0("For '", id, "', all points on the path were outside the arena bounds. The resulting track is empty."))
+			}else{
+				if(any(clipped)){
+					path$t = path$t[!clipped]
+					path$x = path$x[!clipped]
+					path$y = path$y[!clipped]
+					warning(paste0("For '", id, "', some points on the path were outside the arena bounds. These have been removed."))
+				}
+				# 3. Outlier removal is no longer done for MWM
+				# 4. Check the timestamps for any missing intervals in the raw data
+				timestep = stats::median(diff(path$t), na.rm = T) 
+				new.t = seq(path$t[1], utils::tail(path$t, 1), timestep)
+				# 5. Replace missing and clipped points by interpolated/extrapolated values
+				path$x = Hmisc::approxExtrap(path$t, path$x, xout = new.t, method = "constant", ties = "ordered")$y
+				path$y = Hmisc::approxExtrap(path$t, path$y, xout = new.t, method = "constant", ties = "ordered")$y
+				path$t = new.t
+				# 6. Fix any overzealous extrapolation by bounding to the arena
+				pathpoints = terra::vect(cbind(x = path$x, y = path$y), type = "points", crs = "local")
+				clipped = !as.logical(terra::relate(pathpoints, field, relation = "intersects"))
+				if(any(clipped)){
+					path$x[clipped] = NA
+					path$y[clipped] = NA
+					path$x = stats::approx(path$t, path$x, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
+					path$y = stats::approx(path$t, path$y, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
+				}
 			}
 		}
 	}
-
+	
 	return(path)
 }
 		

@@ -12,6 +12,15 @@ read_barnes_path = function(filename, arena, id, track.format, track.index, inte
 	path$t = path$raw.t[!missing] / arena$correction$t
 	path$x = ((path$raw.x - arena$correction$x) / arena$correction$r)[!missing]
 	path$y = ((path$raw.y - arena$correction$y) / arena$correction$r)[!missing]
+
+	# 1.2. Rotate to match arena.
+	angle = arena$correction$a
+	if(angle != 0){
+		rotated.points = spin(path$x, path$y, deg2rad(angle))
+		path$x = rotated.points$x
+		path$y = rotated.points$y
+	}
+	
 	if(interpolate){
 		if(!all(missing)){ # If track is empty, then interpolation won't help (and will only crash)
 			field = terra::unwrap(arena$zones$arena)
@@ -29,7 +38,6 @@ read_barnes_path = function(filename, arena, id, track.format, track.index, inte
 				}
 				# 3. Outlier removal is not done for Barnes maze.
 				# 4. Check the timestamps for any missing intervals in the raw data
-				end = path$raw.t[length(path$raw.t)]
 				timestep = stats::median(diff(path$t), na.rm = T) 
 				new.t = seq(path$t[1], utils::tail(path$t, 1), timestep)
 				# 5. Replace missing and clipped points by interpolated/extrapolated values
