@@ -1,4 +1,13 @@
-# Rtrack 2.0.1
+# Rtrack 2.0.3
+
+* Fixes for several Windows-specific bugs. 
+* Codebase is now routinely tested on MacOS (Apple Silicon and Intel), Ubuntu Linux and Windows 10.
+* Fixed bug where custom series colours in the variable plots could be incorrectly ordered.
+* Fixed bug where APA zones at certain angles were incorrectly processed.
+* Added ability to rotate MWM and Barnes maze arenas to allow alignment.
+* Improved support for Topscan 3.0 track files.
+
+# Rtrack 2.0.2
 
 * Major update including support for multiple experiment types.
 * Code rewrite to remove dependency on the discontinued sp package.
