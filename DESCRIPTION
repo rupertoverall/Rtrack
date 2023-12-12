@@ -1,7 +1,7 @@
 Package: Rtrack
 Type: Package
 Title: Spatial Navigation Strategy Analysis
-Version: 2.0.3
+Version: 2.0.3.1
 Authors@R: person("Rupert", "Overall", email = "rtrack@rupertoverall.net",
   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3882-6073"))
 Maintainer: Rupert Overall <rtrack@rupertoverall.net>

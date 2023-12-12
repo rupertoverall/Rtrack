@@ -580,9 +580,21 @@ read_arena = function(filename, description = NULL){
 		raw.arena = unlist(strsplit(description$arena.bounds, "\\s+"))
 		if(raw.arena[1] != "circle") stop("The active place avoidance arena must be circular.")
 		raw.aversive.zone = rep(NA, 4)
-		if(!is.null(description$aversive.zone)) raw.aversive.zone = unlist(strsplit(description$aversive.zone, "\\s+"))
+		if(!is.null(description$aversive.zone)){
+			raw.aversive.zone = unlist(strsplit(description$aversive.zone, "\\s+"))
+			if(as.numeric(raw.aversive.zone[3]) <= 0){
+				warning("Aversive zone with is not greater than zero so is considered absent.")
+				raw.aversive.zone = rep(NA, 4) # Reset to empty if zone description is invalid.
+			}
+		}
 		raw.old.aversive.zone = rep(NA, 4)
-		if(!is.null(description$old.aversive.zone)) raw.old.aversive.zone = unlist(strsplit(description$old.aversive.zone, "\\s+"))
+		if(!is.null(description$old.aversive.zone)){
+			raw.old.aversive.zone = unlist(strsplit(description$old.aversive.zone, "\\s+"))
+			if(as.numeric(raw.old.aversive.zone[3]) <= 0){
+				warning("Old aversive zone with is not greater than zero so is considered absent.")
+				raw.old.aversive.zone = rep(NA, 4) # Reset to empty if zone description is invalid.
+			}
+		}
 		if(all(is.na(raw.aversive.zone)) & all(is.na(raw.old.aversive.zone))) stop("At least one of 'aversive.zone' or 'old.aversive.zone' must be provided in the arena description.")
 		raw.reference.rotation = unlist(strsplit(description$arena.rotation, "\\s+"))
 		
@@ -615,14 +627,16 @@ read_arena = function(filename, description = NULL){
 			start.angle = (aversive.centre - (aversive.width / 2)) %% 360,
 			end.angle = (aversive.centre + (aversive.width / 2)) %% 360
 		)
+		old.aversive.centre = as.numeric(raw.old.aversive.zone[2])
+		old.aversive.width = as.numeric(raw.old.aversive.zone[3])
 		old.aversive.zone = list(
 			shape = as.character(raw.old.aversive.zone[1]),
 			x = 0, 
 			y = 0, 
 			start.radius = ifelse(length(raw.old.aversive.zone) == 5, as.numeric(raw.old.aversive.zone[4]) / correction$r, 0),
 			end.radius = ifelse(length(raw.old.aversive.zone) == 5, as.numeric(raw.old.aversive.zone[5]) / correction$r, 1),
-			start.angle = as.numeric(raw.old.aversive.zone[2]),
-			end.angle = as.numeric(raw.old.aversive.zone[3])
+			start.angle = (old.aversive.centre - (old.aversive.width / 2)) %% 360,
+			end.angle = (old.aversive.centre + (old.aversive.width / 2)) %% 360
 		)
 		
 		# Define zones
@@ -665,26 +679,52 @@ read_arena = function(filename, description = NULL){
 			negative.post = terra::vect(square(post.sqcentre['x'], post.sqcentre['y'], post.sqcorner['x'], post.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena after sector
 			negative.inner = terra::vect(circle(aversive.zone$x, aversive.zone$y, aversive.zone$start.radius), type = "polygons", crs = "local") # Inner circle
 	    negative.outer = terra::vect(circle(aversive.zone$x, aversive.zone$y, aversive.zone$end.radius), type = "polygons", crs = "local") # Outer circle
-			arena$zones$aversive.zone = terra::intersect(
-				terra::erase(
-					arena$zones$arena, 
-					rbind(negative.pre, negative.post)
-				),
-				terra::erase(negative.outer, negative.inner)
-			)
+	    if(aversive.width >= 360){
+	    	warning("The aversive zone occupies the entire arena - this is presumably an error.")
+	    	arena$zones$aversive.zone = arena$zones$arena
+	    }else if(aversive.width > 180){
+				arena$zones$aversive.zone = terra::intersect(
+					terra::erase(
+						arena$zones$arena, 
+						terra::intersect(negative.pre, negative.post)
+					),
+					terra::erase(negative.outer, negative.inner)
+				)
+	    }else{
+	    	arena$zones$aversive.zone = terra::intersect(
+	    		terra::erase(
+	    			arena$zones$arena, 
+	    			rbind(negative.pre, negative.post)
+	    		),
+	    		terra::erase(negative.outer, negative.inner)
+	    	)
+	    }
 		}
 		if(!is.null(description$old.aversive.zone)){
 			negative.pre = terra::vect(square(old.pre.sqcentre['x'], old.pre.sqcentre['y'], old.pre.sqcorner['x'], old.pre.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena before sector
 			negative.post = terra::vect(square(old.post.sqcentre['x'], old.post.sqcentre['y'], old.post.sqcorner['x'], old.post.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena after sector
 			negative.inner = terra::vect(circle(old.aversive.zone$x, old.aversive.zone$y, old.aversive.zone$start.radius), type = "polygons", crs = "local") # Inner circle
 			negative.outer = terra::vect(circle(old.aversive.zone$x, old.aversive.zone$y, old.aversive.zone$end.radius), type = "polygons", crs = "local") # Outer circle
-			arena$zones$old.aversive.zone = terra::intersect(
-				terra::erase(
-					arena$zones$arena, 
-					rbind(negative.pre, negative.post)
-				),
-				terra::erase(negative.outer, negative.inner)
-			)
+			if(old.aversive.width >= 360){
+				warning("The old aversive zone occupies the entire arena - this is presumably an error.")
+				arena$zones$old.aversive.zone = arena$zones$arena
+			}else if(old.aversive.width > 180){
+				arena$zones$old.aversive.zone = terra::intersect(
+					terra::erase(
+						arena$zones$arena, 
+						terra::intersect(negative.pre, negative.post)
+					),
+					terra::erase(negative.outer, negative.inner)
+				)
+			}else{
+				arena$zones$old.aversive.zone = terra::intersect(
+					terra::erase(
+						arena$zones$arena, 
+						rbind(negative.pre, negative.post)
+					),
+					terra::erase(negative.outer, negative.inner)
+				)
+			}
 		}
 		
 		# Quadrants are defined such that the centre of the aversive zone is in centre of the north quadrant (by definition straight upwards on the page).
