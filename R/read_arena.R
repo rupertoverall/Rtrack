@@ -509,6 +509,8 @@ read_arena = function(filename, description = NULL){
 				y = object.1.coordinates["y"], 
 				radius = as.numeric(raw.object.1[4]) / correction$r
 			), type = "polygons", crs = "local")
+		}else if(raw.object.1[1] == "polygon"){
+			arena$zones$object.1 = terra::vect(polygon(object.1.coordinates), type = "polygons", crs = "local")
 		}
 		if(raw.object.2[1] == "square"){
 			if(length(raw.object.2) == 4) object.2.coordinates[3] = as.numeric(raw.object.2[4]) / correction$r # Drop in radius if required.
@@ -519,6 +521,8 @@ read_arena = function(filename, description = NULL){
 				y = object.2.coordinates["y"], 
 				radius = as.numeric(raw.object.2[4]) / correction$r
 			), type = "polygons", crs = "local")
+		}else if(raw.object.2[1] == "polygon"){
+			arena$zones$object.2 = terra::vect(polygon(object.2.coordinates), type = "polygons", crs = "local")
 		}
 		# Test that object zones are valid. If not, then the following operations can crash R.
 		if(!is.na(sum(range(terra::ext(arena$zones$object.1)))) & !is.na(sum(range(terra::ext(arena$zones$object.2))))){
