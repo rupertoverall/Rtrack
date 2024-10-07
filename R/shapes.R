@@ -48,6 +48,26 @@ square = function(centre.x, centre.y, corner.x, corner.y = NA, corner.x2 = NA, c
 	}
 }
 
+polygon = function(coords){
+	if (length(coords) %% 2 != 0) {
+		stop("Please provide an even number of coordinates.")
+	}
+
+	x_coords = as.numeric(coords[seq(1, length(coords), by = 2)])
+	y_coords = as.numeric(coords[seq(2, length(coords), by = 2)])
+
+	raw.corners = cbind(x = x_coords, y = y_coords)
+
+	shape = raw.corners
+	shape = rbind(shape, shape[1, ]) # Ensure the polygon is closed
+	colnames(shape) = c("x", "y")
+	
+	# Use convHull to ensure the order of the points yields a convex polygon
+	shape = terra::crds(terra::convHull(terra::vect(shape)))
+
+	return(signif(shape, 4))
+}
+
 standardise_square = function(raw.corners){
 	# Get a model describing the affine transform of a square to the standardised space
 	colnames(raw.corners) = c("x", "y")
