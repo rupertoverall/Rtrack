@@ -402,14 +402,33 @@ read_arena = function(filename, description = NULL){
 
 		# Define zones
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, field = field)
-		centre.radius = field$radius * 0.2 # Centre zone width is 20 % of arena width.
-		wall.radius = field$radius * 0.6 # Wall zone width is 20 % of arena width.
+		if ("centre.width" %in% names(description)) {
+			centre.radius.coeff = as.double(description$centre.width)
+		} else {
+			centre.radius.coeff = 0.2 # Centre zone width is 20 % of arena width.
+		}
+		centre.radius = field$radius * wall.radius.coeff
+
+		if ("wall.width" %in% names(description)) {
+			wall.radius.coeff = 1 - (as.double(description$wall.width) * 2)
+		} else {
+			wall.radius.coeff = 0.6 # Wall zone width is 20 % of arena width.
+		}
+		wall.radius = field$radius * wall.radius.coeff
+
 		wall = list(x = 0, y = 0, outer.radius = field$radius, inner.radius = wall.radius, shape = "square")
 		corner.centre = 1 - ((1 - wall.radius) / 2)
 		corner_topleft = list(x = -corner.centre, y = corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_topright = list(x = corner.centre, y = corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomright = list(x = corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomleft = list(x = -corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
+
+		if ("vicinity.width" %in% names(description)) {
+			vicinity.width.coeff = as.double(description$vicinity.width)
+		} else {
+			vicinity.width.coeff = 0.2 # Half width of wall zone.
+		}
+		object.vicinity.width = field$radius * vicinity.width.coeff
 
 		# Create polygons representing arena components.
 		arena$zones = list()
@@ -491,14 +510,27 @@ read_arena = function(filename, description = NULL){
 		
 		# Define zones
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, field = field)
-		wall.radius = field$radius * 0.6 # Wall zone width is 20 % of arena width.
+
+		if ("wall.width" %in% names(description)) {
+			wall.radius.coeff = 1 - (as.double(description$wall.width) * 2)
+		} else {
+			wall.radius.coeff = 0.6 # Wall zone width is 20 % of arena width.
+		}
+		wall.radius = field$radius * wall.radius.coeff
+
 		wall = list(x = 0, y = 0, outer.radius = field$radius, inner.radius = wall.radius, shape = "square")
 		corner.centre = 1 - ((1 - wall.radius) / 2)
 		corner_topleft = list(x = -corner.centre, y = corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_topright = list(x = corner.centre, y = corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomright = list(x = corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomleft = list(x = -corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
-		object.vicinity.width = field$radius * 0.2 # Half width of wall zone.
+
+		if ("vicinity.width" %in% names(description)) {
+			vicinity.width.coeff = as.double(description$vicinity.width)
+		} else {
+			vicinity.width.coeff = 0.2 # Half width of wall zone.
+		}
+		object.vicinity.width = field$radius * vicinity.width.coeff
 		
 		# Create polygons representing arena components.
 		arena$zones = list()
