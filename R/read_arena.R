@@ -455,10 +455,16 @@ read_arena = function(filename, description = NULL){
 			stop(paste0("At least one of 'object.1' or 'novel.object.1' must be specified. Please check the arena file '", filename, "'."))
 		}else if(count.object.1 == 1){ # Old object.
 			raw.object.1 = unlist(strsplit(description$object.1, "\\s+"))
-			object.1.coordinates = transform_object(raw.object.1, transform.model)
+			object.1.coordinates = unlist(c(square_transform(as.numeric(raw.object.1[2]), as.numeric(raw.object.1[3]), transform.model),
+			square_transform(as.numeric(raw.object.1[4]), as.numeric(raw.object.1[5]), transform.model),
+			square_transform(as.numeric(raw.object.1[6]), as.numeric(raw.object.1[7]), transform.model),
+			square_transform(as.numeric(raw.object.1[8]), as.numeric(raw.object.1[9]), transform.model)))
 		}else if(count.object.1 == 2){ # New object.
 			raw.object.1 = unlist(strsplit(description$novel.object.1, "\\s+"))
-			object.1.coordinates = transform_object(raw.object.1, transform.model)
+			object.1.coordinates = unlist(c(square_transform(as.numeric(raw.object.1[2]), as.numeric(raw.object.1[3]), transform.model),
+			square_transform(as.numeric(raw.object.1[4]), as.numeric(raw.object.1[5]), transform.model),
+			square_transform(as.numeric(raw.object.1[6]), as.numeric(raw.object.1[7]), transform.model),
+			square_transform(as.numeric(raw.object.1[8]), as.numeric(raw.object.1[9]), transform.model)))
 			object.1.is.novel = TRUE
 		}else if(count.object.1 == 3){
 			stop(paste0("Only one of 'object.1' or 'novel.object.1' may be specified. Please check the arena file '", filename, "'."))
@@ -468,10 +474,16 @@ read_arena = function(filename, description = NULL){
 			stop(paste0("At least one of 'object.2' or 'novel.object.2' must be specified. Please check the arena file '", filename, "'."))
 		}else if(count.object.2 == 1){ # Old object.
 			raw.object.2 = unlist(strsplit(description$object.2, "\\s+"))
-			object.2.coordinates = transform_object(raw.object.2, transform.model)
+			object.2.coordinates = unlist(c(square_transform(as.numeric(raw.object.2[2]), as.numeric(raw.object.2[3]), transform.model),
+			square_transform(as.numeric(raw.object.2[4]), as.numeric(raw.object.2[5]), transform.model),
+			square_transform(as.numeric(raw.object.2[6]), as.numeric(raw.object.2[7]), transform.model),
+			square_transform(as.numeric(raw.object.2[8]), as.numeric(raw.object.2[9]), transform.model)))
 		}else if(count.object.2 == 2){ # New object.
 			raw.object.2 = unlist(strsplit(description$novel.object.2, "\\s+"))
-			object.2.coordinates = transform_object(raw.object.2, transform.model)
+			object.2.coordinates = unlist(c(square_transform(as.numeric(raw.object.2[2]), as.numeric(raw.object.2[3]), transform.model),
+			square_transform(as.numeric(raw.object.2[4]), as.numeric(raw.object.2[5]), transform.model),
+			square_transform(as.numeric(raw.object.2[6]), as.numeric(raw.object.2[7]), transform.model),
+			square_transform(as.numeric(raw.object.2[8]), as.numeric(raw.object.2[9]), transform.model)))
 			object.2.is.novel = TRUE
 		}else if(count.object.2 == 3){
 			stop(paste0("Only one of 'object.2' or 'novel.object.2' may be specified. Please check the arena file '", filename, "'."))
