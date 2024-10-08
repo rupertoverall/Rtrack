@@ -106,3 +106,34 @@ spin = function(x, y, angle){
 	)
 }
 
+transform_object = function(raw.obj, model) {
+	# Transform all points of a raw object by calling `square_transform` on all its points
+
+	# Remove the object type to get just the coordinates
+	raw.obj.coords = raw.obj[-1]
+
+	# If specifying a polygon, make sure there is an even number of coords (as x,y pairs)
+	if ((length(raw.obj.coords) >= 8) && (length(raw.obj.coords) %% 2 != 0)) {
+		stop("Please provide an even number of coordinates for the object.")
+	}
+
+	# Count the number of points and round it up to 4 so we always end up with a vector
+	# of at least 8 coordinates (even if they are NA)
+	n_points = ceiling(length(raw.obj.coords)/2)
+	if (n_points <= 4) n_points = 4;
+
+	# Perform the transformation to end up with a named vector
+	transformed.obj.coords = unlist(
+		mapply(
+			function(x, y) square_transform(as.numeric(x), as.numeric(y), model),
+			raw.obj.coords[seq(1, by = 2, length.out = n_points)], raw.obj.coords[seq(2, by = 2, length.out = n_points)],
+			SIMPLIFY = TRUE, USE.NAMES = FALSE
+		)
+	)
+
+	# Set "x" and "y" names
+	obj.coords = setNames(transformed.obj.coords, rep(c("x", "y"), length.out = length(transformed.obj.coords)))
+
+	# Return the result
+	return(obj.coords)
+}
