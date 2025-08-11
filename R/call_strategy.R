@@ -53,7 +53,7 @@ call_strategy = function(metrics, model = "default"){
 		if(model == "default") model = "mwm_rf_v7"
 		return(call_mwm_strategy(metrics.list, model = model))
 	}else	if(metrics.list[[1]]$arena$description$type == "barnes"){
-		if(model == "default") model = "mb_rf_v1"
+		if(model == "default") model = "mb_rf_v2"
 		return(call_barnes_strategy(metrics.list, model = model))
 	}else	if(metrics.list[[1]]$arena$description$type == "oft"){
 		stop("Strategies are not yet implemented for the open field test. Please contact us if you have a use case.")
