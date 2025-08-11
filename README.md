@@ -17,7 +17,7 @@ Install
 ``` r
 install.packages("Rtrack") 
 ```
-**From github:** This github repository contains the development version with the latest features and bug fixes. To install this version (2.0.3.1), run the following line in [R](https://www.r-project.org/) (you will need to have the [remotes](https://CRAN.R-project.org/package=remotes) package already installed).
+**From github:** This github repository contains the development version with the latest features and bug fixes. To install this version (2.0.4), run the following line in [R](https://www.r-project.org/) (you will need to have the [remotes](https://CRAN.R-project.org/package=remotes) package already installed).
 
 ``` r
 remotes::install_github("rupertoverall/Rtrack") 
