@@ -14,8 +14,8 @@ calculate_apa_metrics = function(path, arena){
 	old.aversive.zone.present = !is.null(arena$zones$old.aversive.zone)
 
 	# APA has two frames of reference. Calculate local (subject) frame coordinates.
-	rotated.angle = arena$correction$e$arena.rotation * (path$t) # Rotated angle changes over time.
-	rotated.points = spin(path$x, path$y, deg2rad(rotated.angle))
+	rotated.angle = arena$correction$e$arena.rotation * (path$t - path$t[1]) # Rotated angle changes over time.
+	rotated.points = spin(path$x, path$y, deg2rad(-rotated.angle))
 	path$local.x = rotated.points$x
 	path$local.y = rotated.points$y
 
@@ -40,8 +40,8 @@ calculate_apa_metrics = function(path, arena){
 	path.length = sum(path.segment.lengths)
 
 	# 'Turning' behaviour measured by angular displacement at each timepoint
-	dx = diff(global.path.values[, "x"])
-	dy = diff(global.path.values[, "y"])
+	dx = diff(local.path.values[, "x"])
+	dy = diff(local.path.values[, "y"])
 	angle.from.xaxis = atan2(dy, dx)
 	turning = diff(angle.from.xaxis)
 
@@ -51,25 +51,25 @@ calculate_apa_metrics = function(path, arena){
 	angle.from.xaxis = ((atan2(y, x) * sign(arena$correction$e$arena.rotation) + pi) / (2 * pi) * 360 + 180) %% 360
 	angle.from.aversive.zone = NA
 	if(aversive.zone.present){
-		aversive.zone.width = arena$aversive.zone$end.angle - arena$aversive.zone$start.angle
+		aversive.zone.width = ((arena$aversive.zone$end.angle + 360) - arena$aversive.zone$start.angle) %% 360
 		angle.from.aversive.zone = 0
 		if(sign(arena$correction$e$arena.rotation) == -1){
-			angle.from.aversive.zone = (((angle.from.xaxis + 90 + 360) - (arena$aversive.zone$start.angle)) %% 360) - aversive.zone.width
+			angle.from.aversive.zone = ((angle.from.xaxis + 90 + 360 - arena$aversive.zone$start.angle) %% 360) - aversive.zone.width
 			angle.from.aversive.zone[angle.from.aversive.zone < 0] = 0 # Inside aversive zone = zero distance.
 		}else{
-			angle.from.aversive.zone = (((arena$aversive.zone$end.angle + 360) - (angle.from.xaxis + 90)) %% 360) - aversive.zone.width
+			angle.from.aversive.zone = ((arena$aversive.zone$end.angle + 360 - angle.from.xaxis + 90) %% 360) - aversive.zone.width
 			angle.from.aversive.zone[angle.from.aversive.zone < 0] = 0 # Inside aversive zone = zero distance.
 		}
 	}
 	angle.from.old.aversive.zone = NA
 	if(old.aversive.zone.present){
-		old.aversive.zone.width = arena$old.aversive.zone$end.angle - arena$old.aversive.zone$start.angle
+		old.aversive.zone.width = ((arena$old.aversive.zone$end.angle + 360) - arena$old.aversive.zone$start.angle) %% 360
 		angle.from.old.aversive.zone = 0
 		if(sign(arena$correction$e$arena.rotation) == -1){
-			angle.from.old.aversive.zone = (((angle.from.xaxis + 90 + 360) - (arena$old.aversive.zone$start.angle)) %% 360) - old.aversive.zone.width
+			angle.from.old.aversive.zone = ((angle.from.xaxis + 90 + 360 - arena$old.aversive.zone$start.angle) %% 360) - old.aversive.zone.width
 			angle.from.old.aversive.zone[angle.from.old.aversive.zone < 0] = 0 # Inside aversive zone = zero distance.
 		}else{
-			angle.from.old.aversive.zone = (((arena$old.aversive.zone$end.angle + 360) - (angle.from.xaxis + 90)) %% 360) - old.aversive.zone.width
+			angle.from.old.aversive.zone = ((arena$old.aversive.zone$end.angle + 360 - angle.from.xaxis + 90) %% 360) - old.aversive.zone.width
 			angle.from.old.aversive.zone[angle.from.old.aversive.zone < 0] = 0 # Inside aversive zone = zero distance.
 		}
 	}
@@ -190,19 +190,19 @@ calculate_apa_metrics = function(path, arena){
 			old.aversive.zone.crossings = ifelse(!is.null(zone.crossings$old.aversive.zone), zone.crossings$old.aversive.zone, NA)
 		),
 		summary = c(
-			path.length = path.length * arena$correction$r,
-			total.time = total.time * arena$correction$t,
-			velocity = velocity.quantile[3] * arena$correction$r * arena$correction$t,
-			immobility = immobility.quantile[3] * arena$correction$r * arena$correction$t,
+			path.length = path.length * arena$correction$r * arena$correction$d,
+			total.time = total.time,
+			velocity = velocity.quantile[3] * arena$correction$r * arena$correction$d / arena$correction$t,
+			immobility = immobility * arena$correction$t,
 			angle.from.aversive.zone = angle.from.aversive.zone.quantile[3],
 			angle.from.old.aversive.zone = angle.from.old.aversive.zone.quantile[3],
 			roaming.entropy = roaming.entropy,
 			latency.to.aversive.zone = ifelse(!is.null(latency.to.zone$aversive.zone), latency.to.zone$aversive.zone, NA) * arena$correction$t,
 			latency.to.old.aversive.zone = ifelse(!is.null(latency.to.zone$old.aversive.zone), latency.to.zone$old.aversive.zone, NA) * arena$correction$t,
 			time.in.centre.zone = time.in.zone$centre * total.time,
-			time.in.wall.zone = time.in.zone$wall * total.time * arena$correction$t,
-			time.in.aversive.zone = ifelse(!is.null(time.in.zone$aversive.zone), time.in.zone$aversive.zone, NA) * total.time * arena$correction$t,
-			time.in.old.aversive.zone = ifelse(!is.null(time.in.zone$old.aversive.zone), time.in.zone$old.aversive.zone, NA) * total.time * arena$correction$t,
+			time.in.wall.zone = time.in.zone$wall * total.time,
+			time.in.aversive.zone = ifelse(!is.null(time.in.zone$aversive.zone), time.in.zone$aversive.zone, NA) * total.time,
+			time.in.old.aversive.zone = ifelse(!is.null(time.in.zone$old.aversive.zone), time.in.zone$old.aversive.zone, NA) * total.time,
 			aversive.zone.crossings = ifelse(!is.null(zone.crossings$aversive.zone), zone.crossings$aversive.zone, NA),
 			old.aversive.zone.crossings = ifelse(!is.null(zone.crossings$old.aversive.zone), zone.crossings$old.aversive.zone, NA)
 		)
