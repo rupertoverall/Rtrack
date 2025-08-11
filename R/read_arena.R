@@ -70,7 +70,7 @@ read_arena = function(filename, description = NULL){
 	}else if(length(missing.required) > 1){
 		stop(paste0("One or more arena description files are missing the following parameters: '", paste(missing.required, collapse = "', '"), "'."))
 	}
-
+	
 	# Convert time.units info into seconds.
 	if(description$time.units == "us" | description$time.units == "micros"){
 		description$time.units = 1e6
@@ -95,6 +95,66 @@ read_arena = function(filename, description = NULL){
 		}
 	}
 	
+	# Check for information on distance conversion.
+	if(!is.null(description$arena.diameter) & !is.null(description$arena.width)) warning("Both 'arena.diameter' and 'arena.width' have been specified. Only 'arena.diameter' will be used.")
+	measured.radius = NULL # this parameter is optional and will be ignored if not present.
+	if(!is.null(description$arena.diameter)){
+		arena.diameter = as.numeric(unlist(strsplit(description$arena.diameter, "\\s+"))[1])
+		arena.width = arena.diameter # For circular arenas, these are interchangeable.
+		if(description$type %in% c("oft", "nor")){ # For square arenas 'r' is actually half the _width_.
+			arena.width = sqrt(arena.diameter ^ 2 / 2)
+		}
+		measured.radius = arena.width / 2
+	}else if(!is.null(description$arena.width)){
+		arena.width = as.numeric(unlist(strsplit(description$arena.width, "\\s+"))[1])
+		measured.radius = arena.width / 2
+	}
+	
+	# Run pre-checks on the number of shape parameters.
+	for(feature in names(description)[grepl("circle", description)]){
+		is.valid = tryCatch({
+			this = FALSE
+			if(feature == "holes"){ # Special case for the Barnes maze autogenerate function.
+				coordinates = as.numeric(unlist(strsplit(description[, feature], "\\s+"))[-2])
+				this = length(coordinates) == 4
+			}else{
+				coordinates = as.numeric(unlist(strsplit(description[, feature], "\\s+"))[-1])
+				this = length(coordinates) == 3
+			}
+			this
+		}, warning = function(e){
+			FALSE
+		}, error = function(e){
+			FALSE
+		})
+		if(!is.valid) stop(paste0("The definition of '", feature, "' is incorrect. Please check the manual for the accepted formats."))
+	}
+	for(feature in names(description)[grepl("square|rect", description)]){
+		is.valid = tryCatch({
+			coordinates = as.numeric(unlist(strsplit(description[, feature], "\\s+"))[-1])
+			length(coordinates) %in% c(3, 4, 8)
+		}, warning = function(e){
+			FALSE
+		}, error = function(e){
+			FALSE
+		})
+		if(!is.valid) stop(paste0("The definition of '", feature, "' is incorrect. Please check the manual for the accepted formats."))
+	}
+	for(feature in names(description)[grepl("polygon", description)]){
+		is.valid = tryCatch({
+			coordinates = as.numeric(unlist(strsplit(description[, feature], "\\s+"))[-1])
+			length(coordinates) %% 2 == 0
+		}, warning = function(e){
+			FALSE
+		}, error = function(e){
+			FALSE
+		})
+		if(!is.valid) stop(paste0("The definition of '", feature, "' is incorrect. Please check the manual for the accepted formats."))
+	}
+	
+	if(is.null(filename) | is.na(filename) | as.character(filename) == ""){ # In case only description is provided.
+		
+	}
 	id = ifelse(!is.null(description$name), description$name, tools::file_path_sans_ext(basename(filename)))
 	
 	arena = NULL
@@ -109,16 +169,18 @@ read_arena = function(filename, description = NULL){
 		if(is.null(description$goal) & is.null(description$old.goal)) stop("At least one of 'goal' or 'old.goal' must be provided in the arena description.")
 		# Pool dimensions are normalised using 'correction' values. Zero-centred and with a radius of 1.
 		# (Paths are normalised to match).
+		radius = as.numeric(raw.pool[4])
 		correction = list(
 			t = as.numeric(description$time.units),
 			x = as.numeric(raw.pool[2]),
 			y =  as.numeric(raw.pool[3]),
-			r = as.numeric(raw.pool[4]),
+			r = radius,
+			d = c(measured.radius / radius, 1)[1],
 			a = c(as.numeric(description$angle), 0)[1]
 		)
 		pool = list(x = 0, y = 0, radius = 1, shape = "circle") # Defined as unit size.
 		if(!is.null(description$goal)){
-				goal = list(
+			goal = list(
 				shape = as.character(raw.goal[1]),
 				x = (as.numeric(raw.goal[2]) - correction$x) / correction$r, 
 				y = (as.numeric(raw.goal[3]) - correction$y) / correction$r, 
@@ -143,7 +205,7 @@ read_arena = function(filename, description = NULL){
 				old.goal$y = spun$y
 			}
 		}
-
+		
 		# Annulus is ring defined by goal bounds.
 		wall.radius = pool$radius * 0.8 # Wall zone width is 10 % of pool diameter.
 		annulus.outer.radius = NULL
@@ -163,7 +225,7 @@ read_arena = function(filename, description = NULL){
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, pool = pool)
 		if(!is.null(description$goal)) arena$goal = goal
 		if(!is.null(description$old.goal)) arena$old.goal = old.goal
-
+		
 		# Create polygons representing arena components.
 		arena$zones = list()
 		arena$zones$pool = terra::vect(circle(pool$x, pool$y, pool$radius), type = "polygons", crs = "local")
@@ -185,7 +247,7 @@ read_arena = function(filename, description = NULL){
 		if(!is.null(description$old.goal)){
 			arena$zones$old.goal = terra::vect(circle(old.goal$x, old.goal$y, old.goal$radius), type = "polygons", crs = "local")
 		}
-	
+		
 		# Quadrants are defined such that goal (or old goal if goal absent) is in centre of north quadrant.
 		goal.angle = NA
 		if(!is.null(description$goal)) goal.angle = atan(goal$x / goal$y)
@@ -208,9 +270,9 @@ read_arena = function(filename, description = NULL){
 		raw.old.goal = rep(NA, 4)
 		if(!is.null(description$old.goal)) raw.old.goal = unlist(strsplit(description$old.goal, "\\s+"))
 		if(all(is.na(raw.goal)) & all(is.na(raw.old.goal))) stop("At least one of 'goal' or 'old.goal' must be provided in the arena description.")
-		hole.definitions = description[, grep("^hole[^s]?", colnames(description))]
+		hole.definitions = description[, grep("^hole([^s]|$)", colnames(description)), drop = FALSE]
 		n.holes = 0
-		if(!is.null(dim(hole.definitions))){
+		if(length(hole.definitions) > 0){ # At least one hole defined.
 			n.holes = ncol(hole.definitions)
 			if(!is.null(description$holes)) warning("Only use the 'holes' OR the 'hole' parameter. Both are present, so the individual 'hole' definitions will be used (and the 'holes' definition will be ignored).")
 		}else{ # No hole defined. Use the autogenerate function.
@@ -220,14 +282,18 @@ read_arena = function(filename, description = NULL){
 				stop("The holes must be defined. Use either the 'hole' keyword to define each hole, or the 'holes' parameter to autogenerate them based on the position of one hole.")
 			}
 		}
-
+		# Two holes are designated 'adjacent'. The code will crash if they are not present.
+		if(n.holes < 3) stop("A Barnes maze cannot be defined in Rtrack with fewer than 3 holes.")
+		
 		# Arena dimensions are normalised using 'correction' values. Zero-centred and with a radius of 1.
 		# (Paths are normalised to match).
+		radius = as.numeric(raw.field[4])
 		correction = list(
 			t = as.numeric(description$time.units),
 			x = as.numeric(raw.field[2]),
 			y =  as.numeric(raw.field[3]),
-			r = as.numeric(raw.field[4]),
+			r = radius,
+			d = c(measured.radius / radius, 1)[1],
 			a = c(as.numeric(description$angle), 0)[1],
 			e = list(
 				n.holes = as.numeric(n.holes)
@@ -267,7 +333,7 @@ read_arena = function(filename, description = NULL){
 		hole.centre.x = rep(NA, n.holes)
 		hole.centre.y = rep(NA, n.holes)
 		hole.radius = rep(NA, n.holes)
-		if(!is.null(dim(hole.definitions))){ # Holes are individually defined.
+		if(length(hole.definitions) > 0){ # Holes are individually defined.
 			for(i in seq_along(hole.definitions)){
 				def = unlist(strsplit(hole.definitions[, i], "\\s+"))
 				hole.centre.x[i] = (as.numeric(def[2]) - correction$x) / correction$r
@@ -364,7 +430,6 @@ read_arena = function(filename, description = NULL){
 	}else	if(description$type == "oft"){
 		## ----- OFT -----
 		raw.field = unlist(strsplit(description$arena.bounds, "\\s+"))
-		if(raw.field[1] != "square") stop("The open field arena must be square.")
 		# Coordinates will be converted into a consistent square polygon.
 		raw.coordinates = NULL
 		if(raw.field[1] == "square"){
@@ -381,9 +446,10 @@ read_arena = function(filename, description = NULL){
 				stop("The arena definition is incorrect. Please check the manual for the accepted formats.")
 			}
 		}else{
-			stop("Only square or rectangular arenas are supported at this stage.")
+			stop("The open field arena must be square.")
 		}
 		# (Paths are normalised to match).
+		radius = standardised_radius_square(raw.coordinates)
 		correction = list(
 			t = as.numeric(description$time.units),
 			x1 = raw.coordinates[1, "x"],
@@ -394,12 +460,13 @@ read_arena = function(filename, description = NULL){
 			y3 = raw.coordinates[3, "y"],
 			x4 = raw.coordinates[4, "x"],
 			y4 = raw.coordinates[4, "y"],
-			r = standardised_radius_square(raw.coordinates),
+			r = radius,
+			d = c(measured.radius / radius, 1)[1],
 			a = c(as.numeric(description$angle), 0)[1],
 			model = transform.model
 		)
 		field = list(x = 0, y = 0, radius = 1, shape = "square") # Defined as unit size ('radius' is 1/2 width)
-
+		
 		# Define zones
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, field = field)
 		centre.radius = field$radius * 0.2 # Centre zone width is 20 % of arena width.
@@ -410,7 +477,7 @@ read_arena = function(filename, description = NULL){
 		corner_topright = list(x = corner.centre, y = corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomright = list(x = corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
 		corner_bottomleft = list(x = -corner.centre, y = -corner.centre, radius = 1 - corner.centre, shape = "square")
-
+		
 		# Create polygons representing arena components.
 		arena$zones = list()
 		arena$zones$field = terra::vect(square(field$x, field$y, field$radius), type = "polygons", crs = "local")
@@ -427,11 +494,27 @@ read_arena = function(filename, description = NULL){
 	}else	if(description$type == "nor"){
 		## ----- NOR -----
 		raw.field = unlist(strsplit(description$arena.bounds, "\\s+"))
-		if(raw.field[1] != "square") stop("The novel object recognition task arena must be square.")
 		# Coordinates will be converted into a consistent square polygon.
-		raw.coordinates = square(raw.field[2], raw.field[3], raw.field[4], raw.field[5], raw.field[6], raw.field[7], raw.field[8], raw.field[9])
-		transform.model = standardise_square(raw.coordinates)
+		raw.coordinates = NULL
+		if(raw.field[1] %in% c("square", "rectangle", "rect")){
+			if(length(raw.field) == 4){
+				raw.coordinates = square(raw.field[2], raw.field[3], raw.field[4])
+				transform.model = standardise_square(raw.coordinates)
+			}else if(length(raw.field) == 5){
+				raw.coordinates = square(raw.field[2], raw.field[3], raw.field[4], raw.field[5])
+				transform.model = standardise_square(raw.coordinates)
+			}else if(length(raw.field) == 9){
+				raw.coordinates = square(raw.field[2], raw.field[3], raw.field[4], raw.field[5], raw.field[6], raw.field[7], raw.field[8], raw.field[9])
+				transform.model = standardise_square(raw.coordinates)
+			}else{
+				stop("The arena definition is incorrect. Please check the manual for the accepted formats.")
+			}
+		}else{
+			stop("The novel object recognition task arena must be square.")
+		}
+		
 		# (Paths are normalised to match).
+		radius = standardised_radius_square(raw.coordinates)
 		correction = list(
 			t = as.numeric(description$time.units),
 			x1 = raw.coordinates[1, "x"],
@@ -442,54 +525,73 @@ read_arena = function(filename, description = NULL){
 			y3 = raw.coordinates[3, "y"],
 			x4 = raw.coordinates[4, "x"],
 			y4 = raw.coordinates[4, "y"],
-			r = standardised_radius_square(raw.coordinates),
+			r = radius,
+			d = c(measured.radius / radius, 1)[1],
 			a = c(as.numeric(description$angle), 0)[1],
 			model = transform.model
 		)
 		field = list(x = 0, y = 0, radius = 1, shape = "square") # Defined as unit size ('radius' is 1/2 width)
-
-		# Objects
+		
+		# Objects.
 		object.1.is.novel = object.2.is.novel = FALSE
-		count.object.1 = sum(!is.null(description$object.1), (!is.null(description$novel.object.1)) * 2)
-		if(count.object.1 == 0){
+		object.1.code = sum(!is.null(description$object.1), (!is.null(description$novel.object.1)) * 2)
+		if(object.1.code == 0){
 			stop(paste0("At least one of 'object.1' or 'novel.object.1' must be specified. Please check the arena file '", filename, "'."))
-		}else if(count.object.1 == 1){ # Old object.
-			raw.object.1 = unlist(strsplit(description$object.1, "\\s+"))
-			object.1.coordinates = unlist(c(square_transform(as.numeric(raw.object.1[2]), as.numeric(raw.object.1[3]), transform.model),
-			square_transform(as.numeric(raw.object.1[4]), as.numeric(raw.object.1[5]), transform.model),
-			square_transform(as.numeric(raw.object.1[6]), as.numeric(raw.object.1[7]), transform.model),
-			square_transform(as.numeric(raw.object.1[8]), as.numeric(raw.object.1[9]), transform.model)))
-		}else if(count.object.1 == 2){ # New object.
-			raw.object.1 = unlist(strsplit(description$novel.object.1, "\\s+"))
-			object.1.coordinates = unlist(c(square_transform(as.numeric(raw.object.1[2]), as.numeric(raw.object.1[3]), transform.model),
-			square_transform(as.numeric(raw.object.1[4]), as.numeric(raw.object.1[5]), transform.model),
-			square_transform(as.numeric(raw.object.1[6]), as.numeric(raw.object.1[7]), transform.model),
-			square_transform(as.numeric(raw.object.1[8]), as.numeric(raw.object.1[9]), transform.model)))
-			object.1.is.novel = TRUE
-		}else if(count.object.1 == 3){
+		}else if(object.1.code < 3){ # Old object.
+			raw.object.1 = unlist(strsplit(description[1, grep("object\\.1", names(description))], "\\s+"))
+			object.1.coordinates = NULL
+			if(raw.object.1[1] %in% c("square", "rectangle", "rect")){
+				if(length(raw.object.1) == 4){
+					raw.coordinates = square(raw.object.1[2], raw.object.1[3], raw.object.1[4])
+				}else if(length(raw.object.1) == 5){
+					raw.coordinates = square(raw.object.1[2], raw.object.1[3], raw.object.1[4], raw.object.1[5])
+				}else if(length(raw.object.1) == 9){
+					raw.coordinates = square(raw.object.1[2], raw.object.1[3], raw.object.1[4], raw.object.1[5], raw.object.1[6], raw.object.1[7], raw.object.1[8], raw.object.1[9])
+				}else{
+					stop("The definition of 'object.1' is incorrect. Please check the manual for the accepted formats.")
+				}
+			}else if(raw.object.1[1] == "circle"){
+				raw.coordinates = circle(raw.object.1[2], raw.object.1[3], raw.object.1[4])
+			}else if(raw.object.1[1] == "polygon"){
+				raw.coordinates = polyshape(matrix(as.numeric(raw.object.1[-1]), ncol = 2, byrow = TRUE))
+			}else{
+				stop("The definition of 'object.1' is incorrect. Please check the manual for the accepted formats.")
+			}
+			object.1.coordinates = project(raw.coordinates[, "x"], raw.coordinates[, "y"], transform.model)
+			if(object.1.code == 2) object.1.is.novel = TRUE
+		}else if(object.1.code == 3){
 			stop(paste0("Only one of 'object.1' or 'novel.object.1' may be specified. Please check the arena file '", filename, "'."))
 		}
-		count.object.2 = sum(!is.null(description$object.2), (!is.null(description$novel.object.2)) * 2)
-		if(count.object.2 == 0){
+		object.2.code = sum(!is.null(description$object.2), (!is.null(description$novel.object.2)) * 2)
+		if(object.2.code == 0){
 			stop(paste0("At least one of 'object.2' or 'novel.object.2' must be specified. Please check the arena file '", filename, "'."))
-		}else if(count.object.2 == 1){ # Old object.
-			raw.object.2 = unlist(strsplit(description$object.2, "\\s+"))
-			object.2.coordinates = unlist(c(square_transform(as.numeric(raw.object.2[2]), as.numeric(raw.object.2[3]), transform.model),
-			square_transform(as.numeric(raw.object.2[4]), as.numeric(raw.object.2[5]), transform.model),
-			square_transform(as.numeric(raw.object.2[6]), as.numeric(raw.object.2[7]), transform.model),
-			square_transform(as.numeric(raw.object.2[8]), as.numeric(raw.object.2[9]), transform.model)))
-		}else if(count.object.2 == 2){ # New object.
-			raw.object.2 = unlist(strsplit(description$novel.object.2, "\\s+"))
-			object.2.coordinates = unlist(c(square_transform(as.numeric(raw.object.2[2]), as.numeric(raw.object.2[3]), transform.model),
-			square_transform(as.numeric(raw.object.2[4]), as.numeric(raw.object.2[5]), transform.model),
-			square_transform(as.numeric(raw.object.2[6]), as.numeric(raw.object.2[7]), transform.model),
-			square_transform(as.numeric(raw.object.2[8]), as.numeric(raw.object.2[9]), transform.model)))
-			object.2.is.novel = TRUE
-		}else if(count.object.2 == 3){
+		}else if(object.2.code < 3){ # Old object.
+			raw.object.2 = unlist(strsplit(description[1, grep("object\\.2", names(description))], "\\s+"))
+			object.2.coordinates = NULL
+			if(raw.object.2[1] %in% c("square", "rectangle", "rect")){
+				if(length(raw.object.2) == 4){
+					raw.coordinates = square(raw.object.2[2], raw.object.2[3], raw.object.2[4])
+				}else if(length(raw.object.2) == 5){
+					raw.coordinates = square(raw.object.2[2], raw.object.2[3], raw.object.2[4], raw.object.2[5])
+				}else if(length(raw.object.2) == 9){
+					raw.coordinates = square(raw.object.2[2], raw.object.2[3], raw.object.2[4], raw.object.2[5], raw.object.2[6], raw.object.2[7], raw.object.2[8], raw.object.2[9])
+				}else{
+					stop("The definition of 'object.2' is incorrect. Please check the manual for the accepted formats.")
+				}
+			}else if(raw.object.2[1] == "circle"){
+				raw.coordinates = circle(raw.object.2[2], raw.object.2[3], raw.object.2[4])
+			}else if(raw.object.2[1] == "polygon"){
+				raw.coordinates = polyshape(matrix(as.numeric(raw.object.2[-1]), ncol = 2, byrow = TRUE))
+			}else{
+				stop("The definition of 'object.2' is incorrect. Please check the manual for the accepted formats.")
+			}
+			object.2.coordinates = project(raw.coordinates[, "x"], raw.coordinates[, "y"], transform.model)
+			if(object.2.code == 2) object.2.is.novel = TRUE
+		}else if(object.2.code == 3){
 			stop(paste0("Only one of 'object.2' or 'novel.object.2' may be specified. Please check the arena file '", filename, "'."))
 		}
 		
-		# Define zones
+		# Define zones.
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, field = field)
 		wall.radius = field$radius * 0.6 # Wall zone width is 20 % of arena width.
 		wall = list(x = 0, y = 0, outer.radius = field$radius, inner.radius = wall.radius, shape = "square")
@@ -512,29 +614,11 @@ read_arena = function(filename, description = NULL){
 		corner_bottomright = terra::vect(square(corner_bottomright$x, corner_bottomright$y, corner_bottomright$radius), type = "polygons", crs = "local")
 		corner_bottomleft = terra::vect(square(corner_bottomleft$x, corner_bottomleft$y, corner_bottomleft$radius), type = "polygons", crs = "local")
 		arena$zones$corner = rbind(corner_topleft, corner_topright, corner_bottomright, corner_bottomleft)
-		if(raw.object.1[1] == "square"){
-			if(length(raw.object.1) == 4) object.1.coordinates[3] = as.numeric(raw.object.1[4]) / correction$r # Drop in radius if required.
-			arena$zones$object.1 = terra::vect(square(object.1.coordinates[1], object.1.coordinates[2], object.1.coordinates[3], object.1.coordinates[4], object.1.coordinates[5], object.1.coordinates[6], object.1.coordinates[7], object.1.coordinates[8]), type = "polygons", crs = "local")
-		}else if(raw.object.1[1] == "circle"){
-			arena$zones$object.1 = terra::vect(circle(
-				x = object.1.coordinates["x"], 
-				y = object.1.coordinates["y"], 
-				radius = as.numeric(raw.object.1[4]) / correction$r
-			), type = "polygons", crs = "local")
-		}
-		if(raw.object.2[1] == "square"){
-			if(length(raw.object.2) == 4) object.2.coordinates[3] = as.numeric(raw.object.2[4]) / correction$r # Drop in radius if required.
-			arena$zones$object.2 = terra::vect(square(object.2.coordinates[1], object.2.coordinates[2], object.2.coordinates[3], object.2.coordinates[4], object.2.coordinates[5], object.2.coordinates[6], object.2.coordinates[7], object.2.coordinates[8]), type = "polygons", crs = "local")
-		}else if(raw.object.2[1] == "circle"){
-			arena$zones$object.2 = terra::vect(circle(
-				x = object.2.coordinates["x"], 
-				y = object.2.coordinates["y"], 
-				radius = as.numeric(raw.object.2[4]) / correction$r
-			), type = "polygons", crs = "local")
-		}
+		arena$zones$object.1 = terra::vect(cbind(object.1.coordinates$x, object.1.coordinates$y), type = "polygons", crs = "local")
+		arena$zones$object.2 = terra::vect(cbind(object.2.coordinates$x, object.2.coordinates$y), type = "polygons", crs = "local")
 		# Test that object zones are valid. If not, then the following operations can crash R.
 		if(!is.na(sum(range(terra::ext(arena$zones$object.1)))) & !is.na(sum(range(terra::ext(arena$zones$object.2))))){
-			## Create a region surrounding the objects
+			## Create a region surrounding the objects.
 			object.1.vicinity = terra::buffer(arena$zones$object.1, object.vicinity.width, quadsegs = 90)
 			object.2.vicinity = terra::buffer(arena$zones$object.2, object.vicinity.width, quadsegs = 90)
 			# Erase any overlap between the object buffers and clip to field.
@@ -552,7 +636,7 @@ read_arena = function(filename, description = NULL){
 				),
 				arena$zones$field
 			)
-			zone.names = setNames(, names(arena$zones))
+			zone.names = setNames(arena$zones, names(arena$zones))
 			if(!is.null(arena$zones$novel.object.1)) zone.names[c("object.1", "object.1.vicinity")] = c("novel.object.1", "novel.object.1.vicinity")
 			if(!is.null(arena$zones$novel.object.2)) zone.names[c("object.2", "object.2.vicinity")] = c("novel.object.2", "novel.object.2.vicinity")
 		}else{
@@ -600,11 +684,13 @@ read_arena = function(filename, description = NULL){
 		
 		# Arena dimensions are normalised using 'correction' values. Zero-centred and with a radius of 1
 		# (Paths are normalised to match)
+		radius = as.numeric(raw.arena[4])
 		correction = list(
 			t = as.numeric(description$time.units),
 			x = as.numeric(raw.arena[2]),
-			y =  as.numeric(raw.arena[3]),
-			r = as.numeric(raw.arena[4]),
+			y = as.numeric(raw.arena[3]),
+			r = radius,
+			d = c(measured.radius / radius, 1)[1],
 			a = c(as.numeric(description$angle), 0)[1],
 			e = list(
 				arena.rotation = as.numeric(raw.reference.rotation)
@@ -643,7 +729,7 @@ read_arena = function(filename, description = NULL){
 		arena = list(id = id, type = as.character(description$type), description = description, correction = correction, arena = field, centre = centre, wall = wall)
 		if(!is.null(description$aversive.zone)) arena$aversive.zone = aversive.zone
 		if(!is.null(description$old.aversive.zone)) arena$old.aversive.zone = old.aversive.zone
-
+		
 		# Build aversive sector from components
 		centre.theta = deg2rad(aversive.zone$start.angle - 90)
 		corner.theta = deg2rad(aversive.zone$start.angle)
@@ -654,7 +740,7 @@ read_arena = function(filename, description = NULL){
 		corner.theta = deg2rad(aversive.zone$end.angle)
 		post.sqcentre = c(x = sin(centre.theta), y = cos(centre.theta)) * aversive.zone$end.radius + c(aversive.zone$x, aversive.zone$y)
 		post.sqcorner = c(x = sin(corner.theta), y = cos(corner.theta)) * aversive.zone$end.radius + c(aversive.zone$x, aversive.zone$y)
-
+		
 		# Build old aversive sector from components
 		centre.theta = deg2rad(old.aversive.zone$start.angle - 90)
 		corner.theta = deg2rad(old.aversive.zone$start.angle)
@@ -678,11 +764,11 @@ read_arena = function(filename, description = NULL){
 			negative.pre = terra::vect(square(pre.sqcentre['x'], pre.sqcentre['y'], pre.sqcorner['x'], pre.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena before sector
 			negative.post = terra::vect(square(post.sqcentre['x'], post.sqcentre['y'], post.sqcorner['x'], post.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena after sector
 			negative.inner = terra::vect(circle(aversive.zone$x, aversive.zone$y, aversive.zone$start.radius), type = "polygons", crs = "local") # Inner circle
-	    negative.outer = terra::vect(circle(aversive.zone$x, aversive.zone$y, aversive.zone$end.radius), type = "polygons", crs = "local") # Outer circle
-	    if(aversive.width >= 360){
-	    	warning("The aversive zone occupies the entire arena - this is presumably an error.")
-	    	arena$zones$aversive.zone = arena$zones$arena
-	    }else if(aversive.width > 180){
+			negative.outer = terra::vect(circle(aversive.zone$x, aversive.zone$y, aversive.zone$end.radius), type = "polygons", crs = "local") # Outer circle
+			if(aversive.width >= 360){
+				warning("The aversive zone occupies the entire arena - this is presumably an error.")
+				arena$zones$aversive.zone = arena$zones$arena
+			}else if(aversive.width > 180){
 				arena$zones$aversive.zone = terra::intersect(
 					terra::erase(
 						arena$zones$arena, 
@@ -690,15 +776,15 @@ read_arena = function(filename, description = NULL){
 					),
 					terra::erase(negative.outer, negative.inner)
 				)
-	    }else{
-	    	arena$zones$aversive.zone = terra::intersect(
-	    		terra::erase(
-	    			arena$zones$arena, 
-	    			rbind(negative.pre, negative.post)
-	    		),
-	    		terra::erase(negative.outer, negative.inner)
-	    	)
-	    }
+			}else{
+				arena$zones$aversive.zone = terra::intersect(
+					terra::erase(
+						arena$zones$arena, 
+						rbind(negative.pre, negative.post)
+					),
+					terra::erase(negative.outer, negative.inner)
+				)
+			}
 		}
 		if(!is.null(description$old.aversive.zone)){
 			negative.pre = terra::vect(square(old.pre.sqcentre['x'], old.pre.sqcentre['y'], old.pre.sqcorner['x'], old.pre.sqcorner['y']), type = "polygons", crs = "local") # Square blocking arena before sector
@@ -727,7 +813,7 @@ read_arena = function(filename, description = NULL){
 			}
 		}
 		
-		# Quadrants are defined such that the centre of the aversive zone is in centre of the north quadrant (by definition straight upwards on the page).
+		# Quadrants are defined such that the centre of the aversive zone is in centre of the north quadrant.
 		aversive.zone.angle = deg2rad((aversive.zone$start.angle %% 360 + aversive.zone$end.angle %% 360) / 2)
 		if(is.na(aversive.zone.angle)) aversive.zone.angle = deg2rad((old.aversive.zone$start.angle %% 360 + old.aversive.zone$end.angle %% 360) / 2)
 		n.point = c(x = sin(aversive.zone.angle - pi * 0.25), y = cos(aversive.zone.angle - pi * 0.25))
@@ -741,11 +827,11 @@ read_arena = function(filename, description = NULL){
 	}else{
 		stop("The arena file '", filename, "' does not have a valid 'type' definition.")
 	}
-
+	
 	# Serialise terra objects to enable parallelisation.
 	arena$zones = lapply(arena$zones, terra::wrap)
-
+	
 	class(arena) = "rtrack_arena"
 	return(arena)
-
+	
 }
