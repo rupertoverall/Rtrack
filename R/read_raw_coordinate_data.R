@@ -98,16 +98,16 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, x.col]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, y.col]))
 		}else if(track.format == "ethovision.3.csv"){
-			raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = track.encoding)
+			raw = utils::read.delim(filename, header = FALSE, stringsAsFactors = FALSE, fill = T, fileEncoding = track.encoding)
 			header.lines = grep("Sample no\\.", raw[, 1], ignore.case = TRUE) - 1
-			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE, skip = header.lines)
+			coordinate.data = utils::read.csv(filename, header = TRUE, stringsAsFactors = FALSE, skip = header.lines)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "ethovision.3.csv2"){
-			raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fill = T, fileEncoding = track.encoding)
+			raw = utils::read.delim(filename, header = FALSE, stringsAsFactors = FALSE, fill = T, fileEncoding = track.encoding)
 			header.lines = grep("Sample no\\.", raw[, 1], ignore.case = TRUE) - 1
-			coordinate.data = utils::read.csv2(filename, header = T, stringsAsFactors = FALSE, skip = header.lines)
+			coordinate.data = utils::read.csv2(filename, header = TRUE, stringsAsFactors = FALSE, skip = header.lines)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
@@ -115,9 +115,9 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			if(is.null(track.index)){
 				stop("The parameter 'track.index' must be set in order to read files of format 'actimetrics.watermaze'.")
 			}else{
-				raw = utils::read.csv(filename, header = T, skip = 1, stringsAsFactors = FALSE, fileEncoding = track.encoding)
-				if(all(((track.index * 3) + (-2:0)) %in% 1:ncol(raw))){
-				coordinate.data = as.matrix(raw[, (track.index * 3) + (-2:0)])
+				raw = utils::read.csv(filename, header = TRUE, skip = 1, stringsAsFactors = FALSE, fileEncoding = track.encoding)
+				if(all(((track.index[1] * 3) + (-2:0)) %in% 1:ncol(raw))){
+				coordinate.data = as.matrix(raw[, (track.index[1] * 3) + (-2:0)])
 				path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 				path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 				path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,2]))
@@ -126,7 +126,7 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 				}
 			}
 		}else if(track.format == "dsnt.wmdat"){
-			raw = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, fileEncoding = track.encoding)
+			raw = utils::read.delim(filename, header = FALSE, stringsAsFactors = FALSE, fileEncoding = track.encoding)
 			coordinate.data = matrix(raw[, 1], ncol = 3, byrow = T)
 			path$raw.t = suppressWarnings(as.numeric(strptime(coordinate.data[ ,3], "%m-%d-%Y %H:%M:%S"))) - suppressWarnings(as.numeric(strptime(coordinate.data[1 ,3], "%m-%d-%Y %H:%M:%S")))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,1]))
@@ -135,7 +135,7 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			# Test for column width in this chaotic format.
 			raw = readLines(filename)
 			ncols = max(sapply(tail(raw), function(s) length(strsplit(s, "\\s")[[1]]) ))
-			raw = utils::read.table(filename, header = F, stringsAsFactors = FALSE, col.names = seq_len(ncols), fill = TRUE, fileEncoding = track.encoding)
+			raw = utils::read.table(filename, header = FALSE, stringsAsFactors = FALSE, col.names = seq_len(ncols), fill = TRUE, fileEncoding = track.encoding)
 			# Check the frame rate and catch missing or not found values
 			frame.string = paste0(raw[which(grepl("Frame", raw[, 1], ignore.case = TRUE) & grepl("Rate", raw[, 2], ignore.case = TRUE)), ], collapse = "")
 			frame.rate = c(as.numeric(gsub("[^0-9.]", "", frame.string)), 0)[1]   
@@ -151,33 +151,33 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterX", headers)]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ , grep("CenterY", headers)]))
 		}else if(track.format == "anymaze.csv"){
-			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			coordinate.data = utils::read.delim(filename, header = FALSE, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
 			path$raw.t = suppressWarnings(as.numeric(strptime(coordinate.data[ ,1], format = "%H:%M:%OS"))) - suppressWarnings(as.numeric(strptime(coordinate.data[1 ,1], format = "%H:%M:%OS")))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 		}else if(track.format == "anymaze.csv2"){
-			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ";", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			coordinate.data = utils::read.delim(filename, header = FALSE, skip = 1, sep = ";", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 		}else if(track.format == "anymaze.tab"){
-			coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = "\t", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+			coordinate.data = utils::read.delim(filename, header = FALSE, skip = 1, sep = "\t", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 		# }else if(track.format == "eztrack.csv"){
-		# 	coordinate.data = utils::read.delim(filename, header = F, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
+		# 	coordinate.data = utils::read.delim(filename, header = FALSE, skip = 1, sep = ",", stringsAsFactors = FALSE, fill = TRUE, fileEncoding = track.encoding)
 		# 	path$raw.t = suppressWarnings(as.numeric(coordinate.data[ ,1]))
 		# 	path$raw.x = suppressWarnings(as.numeric(coordinate.data[ ,2]))
 		# 	path$raw.y = suppressWarnings(as.numeric(coordinate.data[ ,3]))
 		# }else if(track.format == "timestamp.nh.csv"){
-		# 	coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
+		# 	coordinate.data = utils::read.csv(filename, header = TRUE, stringsAsFactors = FALSE)
 		# 	keep = as.character(coordinate.data[, 1]) %in% id
 		# 	path$raw.t = suppressWarnings(as.numeric(coordinate.data[keep, 4])) - suppressWarnings(as.numeric(coordinate.data[keep, 4][1]))
 		# 	path$raw.x = suppressWarnings(as.numeric(coordinate.data[keep, 2]))
 		# 	path$raw.y = suppressWarnings(as.numeric(coordinate.data[keep, 3]))
 		}else if(track.format == "raw.csv"){
-			coordinate.data = utils::read.csv(filename, header = T, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.csv(filename, header = TRUE, stringsAsFactors = FALSE)
 			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
 				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
 			}
@@ -185,7 +185,7 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "raw.csv2"){
-			coordinate.data = utils::read.csv2(filename, header = T, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.csv2(filename, header = TRUE, stringsAsFactors = FALSE)
 			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
 				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
 			}
@@ -193,32 +193,101 @@ read_raw_coordinate_data = function(filename, track.format, track.index){
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
 		}else if(track.format == "raw.tab"){
-			coordinate.data = utils::read.delim(filename, header = T, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.delim(filename, header = TRUE, stringsAsFactors = FALSE)
 			if(!all(colnames(coordinate.data) %in% c("Time", "X", "Y")) & all(colnames(coordinate.data) %in% c("t", "x", "y"))){
 				colnames(coordinate.data)[match(colnames(coordinate.data), c("t", "x", "y"))] = c("Time", "X", "Y")
 			}
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data$Time))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data$X))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data$Y))
+		}else if(track.format == "raw.free.csv"){
+			coordinate.data = utils::read.csv(filename, header = TRUE, stringsAsFactors = FALSE)
+			if(is.numeric(coordinate.data[, track.index[1]])){
+				path$raw.t = coordinate.data[, track.index[1]]
+			}else if(is.character(coordinate.data[, track.index[1]])){
+				# Try to convert timestamps from '00:00.0' format.
+				s = strsplit(coordinate.data[1, track.index[1]], "\\:")[[1]]
+				if(length(s) == 1){
+					path$raw.t = suppressWarnings(as.numeric(coordinate.data[, track.index[1]]))
+				}else if(length(s) == 2){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 60) + as.numeric(tm[, 2])
+				}else if(length(s) == 3){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 3600) + (as.numeric(tm[, 2]) * 60) + as.numeric(tm[, 3])
+				}else{
+					stop("The timestamp column does not contain correctly-formatted timestamp data.")
+				}
+			}else{
+				stop("The timestamp column does not contain correctly-formatted timestamp data.")
+			}
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, track.index[2]]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, track.index[3]]))
+		}else if(track.format == "raw.free.csv2"){
+			coordinate.data = utils::read.csv2(filename, header = TRUE, stringsAsFactors = FALSE)
+			if(is.numeric(coordinate.data[, track.index[1]])){
+				path$raw.t = coordinate.data[, track.index[1]]
+			}else if(is.character(coordinate.data[, track.index[1]])){
+				# Try to convert timestamps from '00:00.0' format (or 00:00,0 in this file format).
+				s = strsplit(coordinate.data[1, track.index[1]], "\\:")[[1]]
+				if(length(s) == 1){
+					path$raw.t = suppressWarnings(as.numeric(sub("\\,", ".", coordinate.data[, track.index[1]])))
+				}else if(length(s) == 2){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 60) + as.numeric(sub("\\,", ".", tm[, 2]))
+				}else if(length(s) == 3){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 3600) + (as.numeric(tm[, 2]) * 60) + as.numeric(sub("\\,", ".", tm[, 3]))
+				}else{
+					stop("The timestamp column does not contain correctly-formatted timestamp data.")
+				}
+			}else{
+				stop("The timestamp column does not contain correctly-formatted timestamp data.")
+			}
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, track.index[2]]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, track.index[3]]))
+		}else if(track.format == "raw.free.tab"){
+			coordinate.data = utils::read.delim(filename, header = TRUE, stringsAsFactors = FALSE)
+			if(is.numeric(coordinate.data[, track.index[1]])){
+				path$raw.t = coordinate.data[, track.index[1]]
+			}else if(is.character(coordinate.data[, track.index[1]])){
+				# Try to convert timestamps from '00:00.0' format.
+				s = strsplit(coordinate.data[1, track.index[1]], "\\:")[[1]]
+				if(length(s) == 1){
+					path$raw.t = suppressWarnings(as.numeric(coordinate.data[, track.index[1]]))
+				}else if(length(s) == 2){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 60) + as.numeric(tm[, 2])
+				}else if(length(s) == 3){
+					tm = do.call(rbind, strsplit(coordinate.data[, track.index[1]], ":"))
+					path$raw.t = (as.numeric(tm[, 1]) * 3600) + (as.numeric(tm[, 2]) * 60) + as.numeric(tm[, 3])
+				}else{
+					stop("The timestamp column does not contain correctly-formatted timestamp data.")
+				}
+			}else{
+				stop("The timestamp column does not contain correctly-formatted timestamp data.")
+			}
+			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, track.index[2]]))
+			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, track.index[3]]))
 		}else if(track.format == "raw.nh.csv"){
-			coordinate.data = utils::read.csv(filename, header = F, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.csv(filename, header = FALSE, stringsAsFactors = FALSE)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
 		}else if(track.format == "raw.nh.csv2"){
-			coordinate.data = utils::read.csv2(filename, header = F, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.csv2(filename, header = FALSE, stringsAsFactors = FALSE)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
 		}else if(track.format == "raw.nh.tab"){
-			coordinate.data = utils::read.delim(filename, header = F, stringsAsFactors = FALSE)
+			coordinate.data = utils::read.delim(filename, header = FALSE, stringsAsFactors = FALSE)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 1]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 2]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 3]))
 		}else if(track.format == "tracker.2.dat"){
 			raw.header = readLines(filename, n = 100)
 			header.lines = which(grepl("\\%\\%END_HEADER", raw.header))
-			coordinate.data = utils::read.delim(filename, header = F, stringsAsFactors = FALSE, skip = header.lines)
+			coordinate.data = utils::read.delim(filename, header = FALSE, stringsAsFactors = FALSE, skip = header.lines)
 			path$raw.t = suppressWarnings(as.numeric(coordinate.data[, 2]))
 			path$raw.x = suppressWarnings(as.numeric(coordinate.data[, 3]))
 			path$raw.y = suppressWarnings(as.numeric(coordinate.data[, 4]))
