@@ -4,8 +4,8 @@ read_apa_path = function(filename, arena, id, track.format, track.index, interpo
 	path = read_raw_coordinate_data(filename, track.format, track.index)
 	path$id = id
 	
-	# 0. Encode missing pints.
-	# There is a special case for 'tracker.2.dat' data, which defaults to 0, 0 to encode missing data points.
+	# 0. Encode missing points.
+	# There is a special case for 'tracker.2.dat' data, which uses 0, 0 to encode missing data points.
 	# We set these here to NA.
 	fixed.x = path$raw.x
 	fixed.y = path$raw.y
@@ -23,11 +23,6 @@ read_apa_path = function(filename, arena, id, track.format, track.index, interpo
 	path$t = path$raw.t[!missing] / arena$correction$t
 	path$x = ((fixed.x - arena$correction$x) / arena$correction$r)[!missing]
 	path$y = ((fixed.y - arena$correction$y) / arena$correction$r)[!missing]
-
-	# 1.1 Rotate path to normalised orientation (aversive zone centred north).
-	rotated.points = spin(path$x, path$y, deg2rad(-90))
-	path$x = rotated.points$x
-	path$y = rotated.points$y
 
 	if(interpolate){
 		if(!all(missing)){ # If track is empty, then interpolation won't help (and will only crash)
@@ -58,6 +53,11 @@ read_apa_path = function(filename, arena, id, track.format, track.index, interpo
 				path$y = stats::approx(path$t, path$y, xout = new.t, method = "constant", rule = 2, ties = "ordered")$y
 			}
 		}
+	}
+	
+	# 7. Invert y-axis for formats reporting pixel position.
+	if(track.format %in% c("tracker.2.dat")){
+		path$y = path$y * -1
 	}
 
 	return(path)
