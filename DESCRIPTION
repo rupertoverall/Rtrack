@@ -1,7 +1,7 @@
 Package: Rtrack
 Type: Package
 Title: Spatial Navigation Strategy Analysis
-Version: 2.0.3.1
+Version: 2.0.4
 Authors@R: person("Rupert", "Overall", email = "rtrack@rupertoverall.net",
   role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3882-6073"))
 Maintainer: Rupert Overall <rtrack@rupertoverall.net>
@@ -24,7 +24,6 @@ Imports:
     parallel,
     pbapply,
     randomForest,
-    RCurl,
     readxl,
     rjson,
     scales,
@@ -34,6 +33,7 @@ Imports:
     tools,
     utils,
     zip
-RoxygenNote: 7.2.3
-Depends: R (>= 2.10)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 3.5)
 Suggests: knitr, rmarkdown
