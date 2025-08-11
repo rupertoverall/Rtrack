@@ -1,7 +1,7 @@
 # 1. System requirements
 ## Operating system
-This package runs on any operating system with R (≥ version 2.10) installed. The package has been tested on the following systems:
-(Last updated on 2023-08-12 05:52:37 CEST).
+This package runs on any operating system with R (≥ version 3.5) installed. The package has been tested on the following systems:
+(Last updated for Rtrack version 2.0.3 on 2023-08-12 05:52:37 CEST).
 
 |Flavor|Version|Tinstall|Tcheck|Ttotal|Status|Flags|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -21,6 +21,8 @@ This package runs on any operating system with R (≥ version 2.10) installed. T
 
 (NOTEs indicate only that the installed size is 5.2 Mb due to the embedded strategy calling models. This is a bit larger than the 5 Mb package size limit preferred by CRAN. However, having the models embedded in the package simplifies installation.)
 
+We can also confirm that the package runs on Linux ARM64 (we test on a Raspberry Pi 5 running Ubuntu 24.04.2 LTS).
+ 
 ## R dependencies
 Imports: 	crayon, graphics, grDevices, Hmisc, KernSmooth, methods, openxlsx, parallel, pbapply, randomForest, RCurl, readxl, rjson, scales, stats, stringi, terra, tools, utils, zip
 
