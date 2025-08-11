@@ -1,6 +1,6 @@
 #' @importFrom utils globalVariables
 utils::globalVariables(c("threads", "verbose", "progress"))
-read_json = function(filename, threads, verbose){
+read_json = function(filename, threads, verbose, time.units){
 	experiment.data = rjson::fromJSON(file = filename, simplify = FALSE)
 	schema = experiment.data[[1]]
 	experiment.info = experiment.data[[2]]
@@ -23,7 +23,8 @@ read_json = function(filename, threads, verbose){
 			class(this.path) = "rtrack_path"
 			arena.description = as.data.frame(track$arena, stringsAsFactors = FALSE)
 			rownames(arena.description) = "value"
-			this.arena = read_arena(NULL, description = arena.description)
+			arena.description$time.units = time.units
+			this.arena = read_arena(filename = track$id, description = arena.description) # 'filename' only used to pass through ID.
 			this.metrics = calculate_metrics(this.path, this.arena)
 			pbapply::setpb(pb, i)
 			return(this.metrics)
