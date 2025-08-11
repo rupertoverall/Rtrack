@@ -1,3 +1,17 @@
+# Rtrack 2.0.4
+
+* Improved skew correction of square arenas (OFT and NOR).
+* NOR objects may now be arbitrary shapes.
+* Implemented 'raw.free.xxx' track file formats, which enable flexible customisation for reading in data from unsupported sources.
+* Improved variable plots with options for parametric and non-parametric data.
+* Fixed many edge cases in the variable plots.
+* Changed the calculation of 'holes.before.goal' in the Barnes maze to make it more robust.
+*  Fixed a tricksy bug that made reading an experiment from a URL sometimes not work.
+*  Added a patch to allow legacy Rtrack JSON archives to be read in the new system.
+*  Added checks to disallow experiments with mixed arena types.
+*  Improved customisation of all plots.
+*  Improved aesthetics of path and density plots.
+
 # Rtrack 2.0.3
 
 * Fixes for several Windows-specific bugs. 
