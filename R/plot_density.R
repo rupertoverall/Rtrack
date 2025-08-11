@@ -11,6 +11,8 @@
 #'   \code{\link[grDevices]{colorRampPalette}}. The default colouring is a
 #'   simple white-to-blue scale.
 #' @param legend Should a colour scale legend be drawn? Default is TRUE.
+#' @param legend.labels Should the colour scale legend include max/min labels? Default is \code{TRUE}. A value of \code{FALSE} suppresses these labels. Alternatively, a character vector of length 2 can be supplied with user-defined labels.
+#' @param cex.legend A numerical value giving the amount by which the legend labels should be magnified relative to the default (default = 1).
 #' @param feature.col The colour to plot outlines of arena features (goals,
 #'   objects, aversive zone etc., depending on the arena type). Black by
 #'   default, but it may be useful to change this if a very dark colour scheme
@@ -23,6 +25,7 @@
 #' @param margins The margins of the plot (see the option \code{mar} in
 #'   \code{\link[graphics]{par}}). The defaults should normally not need to be
 #'   changed.
+#' @param ... Additional arguments to \code{\link[terra]{plot}}.
 #'
 #' @seealso \code{\link{calculate_metrics}}, \code{\link{plot_path}}.
 #'
@@ -36,13 +39,13 @@
 #' plot_density(metrics)
 #'
 #' @importFrom methods is
-#' @importFrom graphics par plot lines segments
+#' @importFrom graphics par plot lines segments text
 #' @importFrom grDevices colorRampPalette
 #' @importFrom KernSmooth bkde2D
 #' @importFrom terra plot rast mask
 #'
 #' @export
-plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette(c('#FCFBFD', '#9E9AC8', '#3F007D'))(256), legend = TRUE, feature.col = "black", feature.lwd = NA, lwd = 1, resolution = 600, margins = c(0, 0, 3, 0)) {
+plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette(c('#FCFBFD', '#9E9AC8', '#3F007D'))(256), legend = TRUE, legend.labels = TRUE, cex.legend = 1, feature.col = "black", feature.lwd = NA, lwd = 1, resolution = 600, margins = c(0, 0, 3, 0), ...){
  # Accept a 'rtrack_metrics' object or a list of 'rtrack_metrics' objects
 	type = ""
 	if(methods::is(metrics, 'rtrack_metrics')){
@@ -112,7 +115,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA, ...)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.goal)) terra::plot(plot.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.goal)) terra::plot(plot.old.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -160,7 +163,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA, ...)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.goal)) terra::plot(plot.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.goal)) terra::plot(plot.old.goal, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -196,7 +199,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), main = title, xpd = NA, ...)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			terra::plot(plot.arena, lwd = lwd, axes = FALSE, add = T)
 		}
@@ -242,11 +245,11 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), main = title, xpd = NA)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), main = title, xpd = NA, ...)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.object.1)) terra::plot(plot.object.1, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.object.2)) terra::plot(plot.object.2, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
-			terra::plot(plot.arena, lwd = lwd, axes = FALSE, add = T)
+			terra::plot(plot.arena, lwd = lwd, axes = FALSE, add = TRUE)
 		}
 	}else if(type == "apa"){
 		plot.path = NULL
@@ -290,7 +293,7 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 			density.map = KernSmooth::bkde2D(cbind(x = plot.path$x, y = plot.path$y), range.x = list(c(-1, 1), c(-1, 1)), bandwidth = c(.1, .1), gridsize = c(resolution, resolution))
 			rast = terra::rast(ncol = resolution, nrow = resolution, xmin = -1, xmax = 1, ymin = -1, ymax = 1, crs = "local")
 			terra::values(rast) = t(floor(density.map$fhat / max(density.map$fhat) * 255) + 1)[rev(seq_len(resolution)), ]
-			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA)
+			terra::plot(plot.arena, lwd = lwd, mar = margins, axes = FALSE, main = title, xpd = NA, ...)
 			terra::plot(terra::mask(rast, plot.arena), col = col, legend = FALSE, axes = FALSE, add = TRUE)
 			if(!is.null(plot.aversive)) terra::plot(plot.aversive, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 1, add = T)
 			if(!is.null(plot.old.aversive)) terra::plot(plot.old.aversive, col = "#FFFFFF00", border = feature.col, lwd = feature.lwd, lty = 3, add = T)
@@ -301,25 +304,44 @@ plot_density = function(metrics, title = NULL, col = grDevices::colorRampPalette
 	}
 
 	if(legend){
+		plot.legend.labels = FALSE
+		if(legend.labels[1] == TRUE){
+			plot.legend.labels = TRUE
+			legend.labels = c("max", "min") # Default lables.
+		}else if(length(legend.labels) == 2){
+			legend.labels = as.character(legend.labels)
+			plot.legend.labels = TRUE # User-defined.
+		}else{ # No other label systems are supported at this time.
+			plot.legend.labels = FALSE
+		}
 		if(type %in% c("oft", "nor")){ # The square arenas are plotted slightly inset to make space for the legend.
 			width = 1 / 10
-			height = 1.1 / length(col) *.75
-			x1 = rep(1.1, length(col)) - width / 2
-			x2 = rep(1.1, length(col))
-			y1 = seq(.44, 1.21, length.out = length(col))
-			y2 = y1 - height
+			height = 1 / length(col) * .5
+			breaks = seq(1.2, .6, length.out = length(col) + 1)
+			x1 = rep(1.15, length(col)) - width / 2
+			x2 = rep(1.15, length(col))
+			y1 = head(breaks, length(col))
+			y2 = tail(breaks, length(col))
 			graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
-			graphics::rect(x1, .44, x2, 1.21, xpd = NA)
+			graphics::rect(x1, .6, x2, 1.2, xpd = NA)
+			if(plot.legend.labels){
+				graphics::text(x2[1], head(breaks, 1), labels = legend.labels[1], pos = 4, cex = cex.legend, xpd = TRUE)
+				graphics::text(x2[1], tail(breaks, 1), labels = legend.labels[2], pos = 4, cex = cex.legend, xpd = TRUE)
+			}
 		}else{
-			width = 1 / 10
-			height = 1 / length(col) *.75
-			x1 = rep(1, length(col)) - width / 2
-			x2 = rep(1, length(col))
-			y1 = seq(.4, 1.1, length.out = length(col))
-			y2 = y1 - height
+			width = 1 / 1.2 / 10
+			height = 1 / length(col) * .5
+			breaks = seq(1, .5, length.out = length(col) + 1)
+			x1 = rep(1.15 / 1.2, length(col)) - width / 2
+			x2 = rep(1.15 / 1.2, length(col))
+			y1 = head(breaks, length(col))
+			y2 = tail(breaks, length(col))
 			graphics::rect(x1, y1, x2, y2, col = rev(col), border = rev(col), xpd = NA)
-			graphics::rect(x1, .4, x2, 1.1, xpd = NA)
+			graphics::rect(x1, .5, x2, 1, xpd = NA)
+			if(plot.legend.labels){
+				graphics::text(x2[1], head(breaks, 1), labels = legend.labels[1], pos = 4, cex = cex.legend, xpd = TRUE)
+				graphics::text(x2[1], tail(breaks, 1), labels = legend.labels[2], pos = 4, cex = cex.legend, xpd = TRUE)
+			}
 		}
 	}
-	
 }

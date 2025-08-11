@@ -9,11 +9,14 @@ plot_density(
   title = NULL,
   col = (grDevices::colorRampPalette(c("#FCFBFD", "#9E9AC8", "#3F007D")))(256),
   legend = TRUE,
+  legend.labels = TRUE,
+  cex.legend = 1,
   feature.col = "black",
   feature.lwd = NA,
   lwd = 1,
   resolution = 600,
-  margins = c(0, 0, 3, 0)
+  margins = c(0, 0, 3, 0),
+  ...
 )
 }
 \arguments{
@@ -29,6 +32,10 @@ of colours. The recommended (and default) approach is to use
 simple white-to-blue scale.}
 
 \item{legend}{Should a colour scale legend be drawn? Default is TRUE.}
+
+\item{legend.labels}{Should the colour scale legend include max/min labels? Default is \code{TRUE}. A value of \code{FALSE} suppresses these labels. Alternatively, a character vector of length 2 can be supplied with user-defined labels.}
+
+\item{cex.legend}{A numerical value giving the amount by which the legend labels should be magnified relative to the default (default = 1).}
 
 \item{feature.col}{The colour to plot outlines of arena features (goals,
 objects, aversive zone etc., depending on the arena type). Black by
@@ -46,6 +53,8 @@ x 600.}
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should normally not need to be
 changed.}
+
+\item{...}{Additional arguments to \code{\link[terra]{plot}}.}
 }
 \description{
 Plots a density map ("heatmap") of the path.

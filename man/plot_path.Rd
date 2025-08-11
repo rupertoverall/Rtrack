@@ -11,7 +11,8 @@ plot_path(
   highlight = TRUE,
   margins = c(0, 0, 3, 0),
   path.lwd = NA,
-  lwd = 1
+  lwd = 1,
+  ...
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ changed.}
 this is drawn heavier to make them stand out.}
 
 \item{lwd}{The thickness of the lines used to draw the arena. Default is 1.}
+
+\item{...}{Additional plotting parameters (passed to \code{\link[terra]{plot}}).}
 }
 \description{
 Plots the path together with a representation of the arena.
