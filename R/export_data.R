@@ -59,7 +59,7 @@ export_data = function(experiment, file, tracks = "all"){
 		stop("Invalid track identifiers, nothing will be exported.")
 	}
 	
-	type = unique(sapply(experiment$metrics, function(track) track$arena$type ))
+	type = unique(sapply(experiment$metrics[tracks.subset], function(track) track$arena$type ))
 	if(length(type) != 1) stop("It is only possible to export tracks of the same experiment type. Please split the experiment into sub-experiments of the same type and export these separately.")
 	
 	if(tools::file_ext(file) != "trackxf") file = paste0(file, ".trackxf")
