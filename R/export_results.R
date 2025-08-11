@@ -75,6 +75,18 @@ export_results = function(experiment, strategies = NULL, tracks = "all", file = 
 	export.note = paste0("Results exported on ", date(), " by Rtrack (version ", paste0("Rtrack version ", utils::packageVersion("Rtrack")), ") <https://rupertoverall.net/Rtrack>.")
 	result = NULL
 	
+	# Check whether the second argument is an 'rtrack_strategies' object...
+	# ...if not, potentially treat it as an export filename (kludgy but delivers a smoother user experience).
+	if(!methods::is(strategies, 'rtrack_strategies') & !is.null(strategies)){
+		if(is.null(file) & is.character(strategies)){
+			file = strategies
+			strategies = NULL
+		}else{
+			# The 'strategies' argument is not valid and 'file' has been explicitly set: this is an error.
+			stop("You have specified an invalid 'strategies' argument. Please check that the arguments are correctly named and have the right values.")
+		}
+	}
+	
 	# If present, add strategies to exported data.
 	# Pick up strategies (if present) matching the to-be-exported tracks.
 	# Warning if there is a mismatch (add NA where strategies are missing).
