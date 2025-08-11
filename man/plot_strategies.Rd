@@ -8,12 +8,17 @@ plot_strategies(
   strategies,
   experiment,
   factor = NA,
+  x.axis = "day",
   exclude.probe = FALSE,
   boundaries = NA,
+  boundary.lwd = 1,
   legend = TRUE,
   screen = FALSE,
+  layout = NULL,
+  title = "Strategy usage for \%\%f",
+  axis.titles = TRUE,
   margins = c(5, 4, 4, 8),
-  lwd = 2
+  ...
 )
 }
 \arguments{
@@ -27,10 +32,17 @@ plot_strategies(
 \code{NA}, means that all data will be shown in one plot. Specifying a
 grouping factor will cause a separate plot to be generated for each group.}
 
+\item{x.axis}{The scale of the x axis. The default, "Day", will add a
+labelled axis with tick marks at each day. If this parameter is set to
+"Trial", then tick marks are added for each trial. If set to "none", then
+no x axis will be drawn.}
+
 \item{exclude.probe}{Should data from probe trials be excluded (see Details).}
 
 \item{boundaries}{Where should the boundaries between arena types be drawn
 (see Details).}
+
+\item{boundary.lwd}{The thickness of the boundaries. Default is 1.}
 
 \item{legend}{Should a legend be drawn. Default is to add a legend to the
 plot.}
@@ -39,11 +51,28 @@ plot.}
 \code{FALSE}. This can be useful for advanced layout using
 \code{\link[graphics]{split.screen}}.}
 
+\item{layout}{If \code{screen} is \code{TRUE}, this parameter can be given as
+a matrix of indices or level names. The multiple sub-plots will be drawn in
+a grid in the order and layout specified.}
+
+\item{title}{Text for the plot title. The default includes the name of the
+factor and the level encoded as the wildcard "%%f". The remaining text can
+be replaced (for example for language localisation). Using the string "%%f"
+on its own will print the factor and level without additional text. The
+string "" will suppress the title entirely. Note that this overrides the
+usual plotting parameter 'main' (which would give the same title to all
+subplots).}
+
+\item{axis.titles}{Should axis titles be drawn. Default is to add titles for
+the x and y axes. These can be suppressed and added afterwards (using
+\code{\link[graphics]{title}}). This might be helpful for localising to a
+different language for example.}
+
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should usually be fine, but they
 can be overridden if, for example, factor names are very long.}
 
-\item{lwd}{The thickness of the plotted lines. Default is 2.}
+\item{...}{Additional arguments to \code{plot}.}
 }
 \value{
 A \code{\link[base]{list}} of strategy call information.
