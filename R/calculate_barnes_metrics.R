@@ -79,7 +79,7 @@ calculate_barnes_metrics = function(path, arena){
 	reversal.error = sqrt((arena$old.goal$x - initial.reversal.end$x) ^ 2 + (arena$old.goal$y - initial.reversal.end$y) ^ 2)
 	initial.reversal.error = list(endpoint = initial.reversal.end, error = reversal.error)
 
-		# Define the goal-oriented (triangular) 'corridor' that is 20 deg either side of optimal path
+	# Define the goal-oriented (triangular) 'corridor' that is 20 deg either side of optimal path
 	if(goal.present){ # Only if there is a goal
 		corridor.angle = 20 / 180 * pi
 		corridor.end.length = tan(corridor.angle) * target.distance # The width of the triangle base at the goal = the hypotenuse for the following calculations
@@ -97,6 +97,7 @@ calculate_barnes_metrics = function(path, arena){
 
 	efficiency = NA
 	if(length(angles) > 0) efficiency = length(which(angles < 15)) / length(angles) * 100
+	
 	# Speed and latency
 	total.time = diff(range(path$t, na.rm = T))
 	intervals = diff(path$t)
@@ -130,6 +131,7 @@ calculate_barnes_metrics = function(path, arena){
 		coordinates = terra::crds(terra::centroids(arena$zones[[hole]]))
 		((atan2(coordinates[, "y"], coordinates[, "x"]) + pi) / (2 * pi) * 360 + 180) %% 360
 	}), hole.ids))
+	
 	# Hole visits.
 	is.at.hole = as.data.frame(in.zones[names(hole.angle.from.xaxis)])
 	at.hole = rep(NA, nrow(is.at.hole))
@@ -175,9 +177,9 @@ calculate_barnes_metrics = function(path, arena){
 		latency.to.zone$old.goal.vicinity = NA
 	}
 	# Count the number of holes visited before visiting the goal (or at all, if the goal was never reached).
-	holes.before.goal = length(which(latency.to.zone[grep("^hole_", names(arena$zones), value = TRUE)] < min(latency.to.zone$goal, total.time, na.rm = TRUE)))
+	holes.before.goal = length(which(latency.to.zone[grep("^hole_.*vicinity$", names(arena$zones), value = TRUE)] < min(latency.to.zone$goal.vicinity, total.time, na.rm = TRUE)))
 	if(!goal.present) holes.before.goal = NA
-	holes.before.old.goal = length(which(latency.to.zone[grep("^hole_", names(arena$zones), value = TRUE)] < min(latency.to.zone$old.goal, total.time, na.rm = TRUE)))
+	holes.before.old.goal = length(which(latency.to.zone[grep("^hole_.*vicinity$", names(arena$zones), value = TRUE)] < min(latency.to.zone$old.goal.vicinity, total.time, na.rm = TRUE)))
 	if(!old.goal.present) holes.before.old.goal = NA
 	
 	# Roaming entropy
@@ -230,7 +232,7 @@ calculate_barnes_metrics = function(path, arena){
 	d.origin.quantile = unname(stats::quantile(d.origin, na.rm = TRUE))
 	
 	outliers = NA
-	if(goal.present) outliers = time.in.zone$pool - time.in.zone$goal.corridor # Path not in approach corridor (% time)
+	if(goal.present) outliers = time.in.zone$arena - time.in.zone$goal.corridor # Path not in approach corridor (% time)
 	centroid.goal.displacement = NA
 	if(goal.present) centroid.goal.displacement = sqrt((path.centroid[1] - arena$goal$x) ^ 2 + (path.centroid[2] - arena$goal$y) ^ 2)
 	centroid.old.goal.displacement = NA
@@ -372,26 +374,26 @@ calculate_barnes_metrics = function(path, arena){
 			old.goal.reached = old.goal.reached
 		),
 		summary = c(
-			path.length = path.length * arena$correction$r,
-			total.time = total.time * arena$correction$t,
-			velocity = median(velocity, na.rm = TRUE) * arena$correction$r * arena$correction$t,
-			immobility = median(immobility, na.rm = TRUE) * arena$correction$r * arena$correction$t,
-			distance.from.goal = median(d.goal) * arena$correction$r,
-			distance.from.old.goal = median(d.old.goal) * arena$correction$r,
+			path.length = path.length * arena$correction$r * arena$correction$d,
+			total.time = total.time,
+			velocity = velocity.quantile[3] * arena$correction$r * arena$correction$d / arena$correction$t,
+			immobility = immobility * arena$correction$t,
+			distance.from.goal = median(d.goal) * arena$correction$r * arena$correction$d,
+			distance.from.old.goal = median(d.old.goal) * arena$correction$r * arena$correction$d,
 			roaming.entropy = roaming.entropy,
 			holes.before.goal = holes.before.goal,
 			holes.before.old.goal = holes.before.old.goal,
 			latency.to.goal = latency.to.zone$goal * arena$correction$t,
 			latency.to.old.goal = latency.to.zone$old.goal * arena$correction$t,
-			time.in.centre.zone = time.in.zone$centre * total.time * arena$correction$t,
-			time.in.annulus.zone = time.in.zone$annulus * total.time * arena$correction$t,
-			time.in.goal.zone = time.in.zone$goal * total.time * arena$correction$t,
-			time.in.old.goal.zone = time.in.zone$old.goal * total.time * arena$correction$t,
-			time.in.hole.vicinity = time.in.zone$hole.vicinity * total.time * arena$correction$t,
-			time.in.n.quadrant = time.in.zone$n.quadrant * total.time * arena$correction$t,
-			time.in.e.quadrant = time.in.zone$e.quadrant * total.time * arena$correction$t,
-			time.in.s.quadrant = time.in.zone$s.quadrant * total.time * arena$correction$t,
-			time.in.w.quadrant = time.in.zone$w.quadrant * total.time * arena$correction$t,
+			time.in.centre.zone = time.in.zone$centre * total.time,
+			time.in.annulus.zone = time.in.zone$annulus * total.time,
+			time.in.goal.zone = time.in.zone$goal * total.time,
+			time.in.old.goal.zone = time.in.zone$old.goal * total.time,
+			time.in.hole.vicinity = time.in.zone$hole.vicinity * total.time,
+			time.in.n.quadrant = time.in.zone$n.quadrant * total.time,
+			time.in.e.quadrant = time.in.zone$e.quadrant * total.time,
+			time.in.s.quadrant = time.in.zone$s.quadrant * total.time,
+			time.in.w.quadrant = time.in.zone$w.quadrant * total.time,
 			goal.crossings = zone.crossings$goal,
 			old.goal.crossings = zone.crossings$old.goal
 		)
