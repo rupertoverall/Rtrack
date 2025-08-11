@@ -10,7 +10,7 @@ read_oft_path = function(filename, arena, id, track.format, track.index, interpo
 		missing = missing | (path$raw.t < time.bounds[1] | path$raw.t > time.bounds[2])
 	}
 	path$t = path$raw.t[!missing] / arena$correction$t
-	transformed = square_transform(path$raw.x[!missing], path$raw.y[!missing], arena$correction$model)
+	transformed = project(path$raw.x[!missing], path$raw.y[!missing], arena$correction$model)
 	path$x = transformed$x
 	path$y = transformed$y
 	if(interpolate){
