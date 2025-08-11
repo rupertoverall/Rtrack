@@ -11,12 +11,13 @@ plot_variable(
   factor.colours = "auto",
   x.axis = NA,
   type = NA,
-  point.type = NA,
+  dist = "q",
   transparency = 0.25,
   exclude.probe = FALSE,
   boundaries = NA,
+  boundary.lwd = 1,
   legend = TRUE,
-  titles = TRUE,
+  axis.titles = TRUE,
   margins = c(5, 4, 4, 8),
   ...
 )
@@ -44,14 +45,22 @@ drawn. Default (\code{NA}) selects an option appropriate for the experiment
 type.}
 
 \item{type}{The type of plot to draw. Either "p" for a side-by-side
-stripchart with individual points, "l" for a line graph showing medians and
-whiskers/error bars for upper and lower quartiles, "b" for both of these
-overlaid, or \code{NA} (the default) indicating that the function should
+stripchart with individual points, "l" for a line graph connecting
+medians/means and whiskers/error bars for data spread (upper and lower
+quartiles or standard deviation, depending on the value of \code{dist}), or
+"b" for both of these overlaid. Additional options "L" and "B" are like
+their lower-case counterparts but a point is also added at the median/mean.
+This is valuable especially when there is only one trial between
+boundaries. The default is \code{NA} indicating that the function should
 choose the most appropriate type for the plot.}
 
-\item{point.type}{The type of point to draw. Either "o" for open circles, "x"
-for filled circles or any of the integer values allowed by R (see the
-\code{pch} option for \code{\link{par}}).}
+\item{dist}{The type of distribution. Either "quartiles" or "non-parametric"
+(default) to show the median +/- upper and lower quartiles, or "sd" or
+"parametric" to show mean +/- standard deviation. This parameter can be
+abbreviated. The parametric option should only be used if the data come
+from a normal/Gaussian distribution. Although not a measure of the
+distribution, it is also possible to use this parameter to show the mean
++/- the standard error of the mean (SEM) using the option "sem".}
 
 \item{transparency}{A value from 0 (fully transparent) to 1 (fully opaque)
 governing the transparency of the points. If filled symbols are used, then
@@ -62,20 +71,20 @@ transparency can help distinguish overlapping points.}
 \item{boundaries}{Where should the boundaries between arena types be drawn
 (see Details).}
 
+\item{boundary.lwd}{The thickness of the boundaries. Default is 1.}
+
 \item{legend}{Should a legend be added. Default is \code{TRUE}.}
 
-\item{titles}{Should titles be drawn. Default is to add a main title and
-titles for the x and y axes. These can be suppressed and added afterwards
-(using \code{\link[graphics]{title}}). This might be helpful for localising
-to a different language for example.}
+\item{axis.titles}{Should axis titles be drawn. Default is to add titles for
+the x and y axes. These can be suppressed and added afterwards (using
+\code{\link[graphics]{title}}). This might be helpful for localising to a
+different language for example.}
 
 \item{margins}{The margins of the plot (see the option \code{mar} in
 \code{\link[graphics]{par}}). The defaults should usually be fine, but they
 can be overridden if, for example, factor names are very long.}
 
-\item{...}{Other parameters that control some aspects of the plot. The values
-for \code{lwd}, \code{las}, \code{pch} and \code{cex} can be adjusted in
-this way.}
+\item{...}{Additional arguments to \code{plot}.}
 }
 \value{
 A named vector of colours used for each factor level.

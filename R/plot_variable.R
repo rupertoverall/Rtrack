@@ -47,30 +47,37 @@
 #'   drawn. Default (\code{NA}) selects an option appropriate for the experiment
 #'   type.
 #' @param type The type of plot to draw. Either "p" for a side-by-side
-#'   stripchart with individual points, "l" for a line graph showing medians and
-#'   whiskers/error bars for upper and lower quartiles, "b" for both of these
-#'   overlaid, or \code{NA} (the default) indicating that the function should
+#'   stripchart with individual points, "l" for a line graph connecting
+#'   medians/means and whiskers/error bars for data spread (upper and lower
+#'   quartiles or standard deviation, depending on the value of \code{dist}), or
+#'   "b" for both of these overlaid. Additional options "L" and "B" are like
+#'   their lower-case counterparts but a point is also added at the median/mean.
+#'   This is valuable especially when there is only one trial between
+#'   boundaries. The default is \code{NA} indicating that the function should
 #'   choose the most appropriate type for the plot.
-#' @param point.type The type of point to draw. Either "o" for open circles, "x"
-#'   for filled circles or any of the integer values allowed by R (see the
-#'   \code{pch} option for \code{\link{par}}).
+#' @param dist The type of distribution. Either "quartiles" or "non-parametric"
+#'   (default) to show the median +/- upper and lower quartiles, or "sd" or
+#'   "parametric" to show mean +/- standard deviation. This parameter can be
+#'   abbreviated. The parametric option should only be used if the data come
+#'   from a normal/Gaussian distribution. Although not a measure of the
+#'   distribution, it is also possible to use this parameter to show the mean
+#'   +/- the standard error of the mean (SEM) using the option "sem".
 #' @param transparency A value from 0 (fully transparent) to 1 (fully opaque)
 #'   governing the transparency of the points. If filled symbols are used, then
 #'   transparency can help distinguish overlapping points.
 #' @param exclude.probe Should data from probe trials be excluded (see Details).
 #' @param boundaries Where should the boundaries between arena types be drawn
 #'   (see Details).
+#' @param boundary.lwd The thickness of the boundaries. Default is 1.
 #' @param legend Should a legend be added. Default is \code{TRUE}.
-#' @param titles Should titles be drawn. Default is to add a main title and
-#'   titles for the x and y axes. These can be suppressed and added afterwards
-#'   (using \code{\link[graphics]{title}}). This might be helpful for localising
-#'   to a different language for example.
+#' @param axis.titles Should axis titles be drawn. Default is to add titles for
+#'   the x and y axes. These can be suppressed and added afterwards (using
+#'   \code{\link[graphics]{title}}). This might be helpful for localising to a
+#'   different language for example.
 #' @param margins The margins of the plot (see the option \code{mar} in
 #'   \code{\link[graphics]{par}}). The defaults should usually be fine, but they
 #'   can be overridden if, for example, factor names are very long.
-#' @param ... Other parameters that control some aspects of the plot. The values
-#'   for \code{lwd}, \code{las}, \code{pch} and \code{cex} can be adjusted in
-#'   this way.
+#' @param ... Additional arguments to \code{plot}.
 #'
 #' @return A named vector of colours used for each factor level.
 #'
@@ -81,13 +88,13 @@
 #' # https://rupertoverall.net/Rtrack/.
 #'
 #' @importFrom graphics par plot lines points segments axis title
-#' @importFrom stats aggregate
+#' @importFrom stats aggregate sd na.omit
 #' @importFrom utils head tail
 #' @importFrom grDevices boxplot.stats
 #' @importFrom scales alpha
 #'
 #' @export
-plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", x.axis = NA, type = NA, point.type = NA, transparency = 0.25, exclude.probe = FALSE, boundaries = NA, legend = TRUE, titles = TRUE, margins = c(5, 4, 4, 8), ...){
+plot_variable = function(variable, experiment, factor = NA, factor.colours = "auto", x.axis = NA, type = NA, dist = "q", transparency = 0.25, exclude.probe = FALSE, boundaries = NA, boundary.lwd = 1, legend = TRUE, axis.titles = TRUE, margins = c(5, 4, 4, 8), ...){
 	plotting.data = experiment$factors
 	# The variable can be in the summary metrics, in the experiment factors, or a separately supplied factor/character vector (checked in that order)
 	if(is.character(variable) & length(variable) == 1 & variable[1] %in% experiment$summary.variables){
@@ -116,9 +123,20 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	trial.names = setNames(seq_along(unique(plotting.data$trial.id)), unique(plotting.data$trial.id))
 	plotting.data$trial.index = factor(as.numeric(trial.names[plotting.data$trial.id]))
 
-	parameters = c(...)
-	boundary.lwd = as.numeric(parameters[which(names(parameters) == "lwd")])
-	if(length(boundary.lwd) == 0 ) boundary.lwd = 2
+	if(tolower(substring(dist, 1, 2)) == "se"){
+		dist = "sem"
+	}else if(substring(dist, 1, 1) %in% c("q", "n")){
+		dist = "q"
+	}else if(substring(dist, 1, 1) %in% c("s", "p")){
+		dist = "s"
+	}else{
+		dist = "q"
+		warning(paste0("The value of '", dist, "' for the 'dist' parameter is not valid. The default settings of median +/- quartiles will be used instead."))
+	}
+	
+	parameters = list(...)
+	lwd = as.numeric(parameters[which(names(parameters) == "lwd")])
+	if(length(lwd) == 0 ) lwd = 2
 	las = as.numeric(parameters[which(names(parameters) == "las")])
 	if(length(las) == 0 ) las = 2
 	cex = as.numeric(parameters[which(names(parameters) == "cex")])
@@ -129,7 +147,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	count = function(x) sum(!is.na(x))
 		
 	if(is.na(factor)){
-		plot.factor = as.character(rep(1, nrow(experiment$factors)))
+		plot.factor = as.character(rep("All data", nrow(experiment$factors)))
 		plot.levels = unique(plot.factor)
 		plot.series = list("All data" = 1:nrow(experiment$factors))
 	}else if(factor %in% names(plotting.data)){
@@ -139,7 +157,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		names(plot.series) = plot.levels
 	}else{
 		warning(paste0("The factor '", factor, "' is not present in this experiment. Plotting all values in one series instead."))
-		plot.factor = as.character(rep(1, nrow(experiment$factors)))
+		plot.factor = as.character(rep("All data", nrow(experiment$factors)))
 		plot.levels = unique(plot.factor)
 		plot.series = list("All data" = 1:nrow(experiment$factors))
 	}
@@ -175,7 +193,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	}
 	if(test.type == "mwm" | test.type == "barnes" | test.type == "apa"){
 		if(is.na(x.axis)) x.axis = "Day"
-		if(is.na(type)) type = "l"
+		if(is.na(type)) type = "L"
 	}else if(test.type == "oft" | test.type == "nor"){
 		if(is.na(x.axis)) x.axis = "Trial"
 		if(is.na(type)) type = "p"
@@ -190,7 +208,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	}
 
 	arena = as.character(stats::aggregate(plotting.data$`_Arena`, list(plotting.data$`_Trial`, plotting.data$`_Day`), `[`, 1)$x)
-	graphics::plot(c(0, max(total.plot.width)), plot.range, type = "n", xaxt = "n", bty = "n", las = 2, lwd = boundary.lwd, xlab = "", ylab = "")
+	do.call(graphics::plot, c(list(c(0, max(total.plot.width)), plot.range, type = "n", xaxt = "n", bty = "n", las = las, xlab = "", ylab = ""), parameters))
 
 	# If boundaries not user-set, then place at the interface of different arenas
 	boundary.indices = NULL
@@ -200,7 +218,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		boundary.indices = which(arena != c(arena[1], arena[-length(arena)]))
 	}else{
 		all.trials = unique(plotting.data[, c("_Day", "_Trial")])
-		boundary.indices = apply(boundaries, 1, function(row) which(all.trials$`_Day` == as.numeric(row[1]) & all.trials$`_Trial` == as.numeric(row[1])) )
+		boundary.indices = apply(boundaries, 1, function(row) which(all.trials$`_Day` == as.numeric(row[1]) & all.trials$`_Trial` == as.numeric(row[2])) )
 	}
 	# Plot boundaries.
 	if(!is.null(boundary.indices) & length(boundary.indices) > 0){
@@ -213,31 +231,83 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 	gi = names(plot.series)
 	step = 1 / length(gi)
 
-	grouped.values = setNames(lapply(gi, function(g){
-		setNames(lapply(ti, function(t){
-			list(x = numeric(), y = numeric(), col = "")
-		}), paste0("trial.", ti))
-	}), gi)
-	for(t in seq_along(ti)){
-		tstart = (t - 1 - step / 2) + ((t - 1) * pad)
-		for(g in seq_along(gi)){
-			y = plotting.data$y[which(plotting.data$trial.index == ti[t] & plot.factor == gi[g])]
-			x = rep(tstart + (g * step), length(y))
-			stats = grDevices::boxplot.stats(y)$stats
-			if(type == "p" | type == "b") graphics::points(x, y, col = scales::alpha(factor.colours[g], transparency) , pch = pch)
-			grouped.values[[g]][[t]]$x = t + ((t - 1) * pad) - 0.5
-			grouped.values[[g]][[t]]$y = y
-			grouped.values[[g]][[t]]$lower.quartile = stats[2]
-			grouped.values[[g]][[t]]$median = stats[3]
-			grouped.values[[g]][[t]]$upper.quartile = stats[4]
-			grouped.values[[g]][[t]]$col = factor.colours[g]
+	grouped.values = NULL
+	if(dist == "q"){
+		grouped.values = setNames(lapply(gi, function(g){
+			setNames(lapply(ti, function(t){
+				list(x = numeric(), y = numeric(), col = "")
+			}), paste0("trial.", ti))
+		}), gi)
+		for(t in seq_along(ti)){
+			tstart = (t - 1 - step / 2) + ((t - 1) * pad)
+			for(g in seq_along(gi)){
+				y = plotting.data$y[which(plotting.data$trial.index == ti[t] & plot.factor == gi[g])]
+				x = rep(tstart + (g * step), length(y))
+				stats = grDevices::boxplot.stats(y)$stats
+				if(type == "p" | type == "b" | type == "B") graphics::points(x, y, col = scales::alpha(factor.colours[g], transparency), pch = pch)
+				grouped.values[[g]][[t]]$x = t + ((t - 1) * pad) - 0.5
+				grouped.values[[g]][[t]]$y = y
+				grouped.values[[g]][[t]]$lower = stats[2]
+				grouped.values[[g]][[t]]$median = stats[3]
+				grouped.values[[g]][[t]]$upper = stats[4]
+				grouped.values[[g]][[t]]$col = factor.colours[g]
+			}
+		}
+	}else if(dist == "s"){
+		grouped.values = setNames(lapply(gi, function(g){
+			setNames(lapply(ti, function(t){
+				list(x = numeric(), y = numeric(), col = "")
+			}), paste0("trial.", ti))
+		}), gi)
+		for(t in seq_along(ti)){
+			tstart = (t - 1 - step / 2) + ((t - 1) * pad)
+			for(g in seq_along(gi)){
+				y = plotting.data$y[which(plotting.data$trial.index == ti[t] & plot.factor == gi[g])]
+				x = rep(tstart + (g * step), length(y))
+				mean = mean(y, na.rm = TRUE)
+				sd = stats::sd(y, na.rm = TRUE)
+				if(type == "p" | type == "b" | type == "B") graphics::points(x, y, col = scales::alpha(factor.colours[g], transparency), pch = pch)
+				grouped.values[[g]][[t]]$x = t + ((t - 1) * pad) - 0.5
+				grouped.values[[g]][[t]]$y = y
+				grouped.values[[g]][[t]]$lower = mean - sd
+				grouped.values[[g]][[t]]$mean = mean
+				grouped.values[[g]][[t]]$upper = mean + sd
+				grouped.values[[g]][[t]]$col = factor.colours[g]
+			}
+		}
+	}else if(dist == "sem"){
+		grouped.values = setNames(lapply(gi, function(g){
+			setNames(lapply(ti, function(t){
+				list(x = numeric(), y = numeric(), col = "")
+			}), paste0("trial.", ti))
+		}), gi)
+		for(t in seq_along(ti)){
+			tstart = (t - 1 - step / 2) + ((t - 1) * pad)
+			for(g in seq_along(gi)){
+				y = plotting.data$y[which(plotting.data$trial.index == ti[t] & plot.factor == gi[g])]
+				x = rep(tstart + (g * step), length(y))
+				mean = mean(y, na.rm = TRUE)
+				se = stats::sd(y, na.rm = TRUE) / sqrt(length(stats::na.omit(y)))
+				if(type == "p" | type == "b" | type == "B") graphics::points(x, y, col = scales::alpha(factor.colours[g], transparency), pch = pch)
+				grouped.values[[g]][[t]]$x = t + ((t - 1) * pad) - 0.5
+				grouped.values[[g]][[t]]$y = y
+				grouped.values[[g]][[t]]$lower = mean - se
+				grouped.values[[g]][[t]]$mean = mean
+				grouped.values[[g]][[t]]$upper = mean + se
+				grouped.values[[g]][[t]]$col = factor.colours[g]
+			}
 		}
 	}
-
-	if(type == "l" | type == "b"){
+	
+	if(type == "l" | type == "b" | type == "L" | type == "B"){
 		for(g in gi){
-			all.x = sapply(grouped.values[[g]], "[[", "x")
-			all.y = sapply(grouped.values[[g]], "[[", "median")
+			if(dist == "q"){
+				all.x = sapply(grouped.values[[g]], "[[", "x")
+				all.y = sapply(grouped.values[[g]], "[[", "median")
+			}else if(dist == "s" | dist == "sem"){
+				all.x = sapply(grouped.values[[g]], "[[", "x")
+				all.y = sapply(grouped.values[[g]], "[[", "mean")
+			}
 			# Split line plot at boundaries.
 			splits = cbind(c(1, boundary.indices), c(boundary.indices, length(all.x) + 1))
 			for(i in seq_len(nrow(splits))){
@@ -245,14 +315,17 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 				x = all.x[block]
 				y = all.y[block]
 				n = length(x) - 1
-				graphics::segments( utils::head(x, n), utils::head(y, n), utils::tail(x, n), utils::tail(y, n), col = grouped.values[[g]][[1]]$col, lwd = boundary.lwd) # Because 'lines' is giving strange errors.
+				graphics::segments( utils::head(x, n), utils::head(y, n), utils::tail(x, n), utils::tail(y, n), col = grouped.values[[g]][[1]]$col, lwd = lwd) # Because 'lines' is giving strange errors.
 				graphics::segments(
 					sapply(grouped.values[[g]], "[[", "x")[block], 
-					sapply(grouped.values[[g]], "[[", "lower.quartile")[block], 
+					sapply(grouped.values[[g]], "[[", "lower")[block], 
 					sapply(grouped.values[[g]], "[[", "x")[block], 
-					sapply(grouped.values[[g]], "[[", "upper.quartile")[block], 
+					sapply(grouped.values[[g]], "[[", "upper")[block], 
 					col = grouped.values[[g]][[1]]$col
 				)
+			}
+			if(type == "L" | type == "B"){
+				graphics::points(all.x, all.y, col = grouped.values[[g]][[1]]$col, pch = pch)
 			}
 		}
 	}
@@ -266,7 +339,7 @@ plot_variable = function(variable, experiment, factor = NA, factor.colours = "au
 		graphics::axis(1, at = ti + ((ti - 1) * pad) - 0.5, labels = seq_along(unique(plotting.data$trial.id)))
 	}
 	
-	if(titles){
+	if(axis.titles){
 		if(tolower(x.axis) == "day"){
 			title(xlab = "Day", ylab = gsub("\\.", " ", paste0(toupper(substring(variable, 1, 1)), tolower(substring(variable, 2)))) )
 		}else if(tolower(x.axis) == "trial"){
