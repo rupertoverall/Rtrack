@@ -84,18 +84,22 @@
 #' @importFrom parallel makeForkCluster detectCores stopCluster
 #' @importFrom rjson fromJSON
 #' @importFrom stringi stri_enc_mark
-#' @importFrom RCurl url.exists
 #'
 #' @export
 read_experiment = function(filename, format = NA, interpolate = FALSE, project.dir = NA, data.dir = project.dir, author.note = "", threads = 1, verbose = FALSE){
 	filepath = filename # Full path (if URL, then will be resolved to a temporary file).
 	filename = basename(filename) # Just name.
 	tempdir = tempdir()
-	if(RCurl::url.exists(filepath)){ # From a URL, only an archive can be read.
-		tempfile = file.path(tempdir, filename)
-		utils::download.file(filepath, tempfile, method = "libcurl", mode = "wb")
-		filepath = tempfile
-	}else{ # On local filesystem
+	# Just try as a URL and catch any failure.
+	is.url = tryCatch({
+		if(inherits(url(filepath), "url")){
+			tempfile = file.path(tempdir, filename)
+			utils::download.file(filepath, tempfile, method = "libcurl", mode = "wb", quiet = TRUE)
+			filepath = tempfile
+		TRUE
+		}
+	}, error = function(e) FALSE, warning = function(e) FALSE )
+	if(!is.url){ # On local filesystem
 		if(is.na(project.dir)) project.dir = dirname(filepath)
 		if(is.na(data.dir)) data.dir = dirname(filepath)
 		if(unlist(strsplit(project.dir, ""))[nchar(project.dir)] != "/") project.dir = paste0(project.dir, "/")
@@ -109,7 +113,13 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 	}
 
 	format = tolower(format)
-	if(is.na(format)){
+	time.units = NA # Only used if recovering from old archive format. Ignored otherwise.
+	if(grepl(":", format)){ # This is a time units specification.
+		full.format = strsplit(format, ":")[[1]]
+		format = full.format[1]
+		time.units = full.format[2]
+	}
+	if(is.na(format) | format == ""){
 		file.header = suppressWarnings(tryCatch({readLines(filepath, n = 5)}, error = function(e) stop("Experiment file does not exist or is corrupt")))
 		non.text = any(suppressWarnings(stringi::stri_enc_mark(file.header)) %in% c("bytes", "native"))
 		trackxf.header = ifelse(!non.text, length(grep('rupertoverall\\.net\\/trackxf\\/trackxf_schema', file.header)), 0)
@@ -152,8 +162,9 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 		progress(paste0("Restoring archived experiment."))
 		experiment = read_trackxf(filepath, threads, verbose)
 	}else	if(format == "json"){ # For backward compatibility. Deprecated.
+		if(is.na(time.units)) stop("To read the old archive format, the time units need to be specified. Append the time code to the format using a semicolon, in the form 'json:s' for seconds. See https://rupertoverall.net/Rtrack/articles/Rtrack_help_page.html#information-for-users-of-version-1 for details.")
 		progress(paste0("Restoring archived experiment."))
-		experiment = read_json(filepath, threads, verbose)
+		experiment = read_json(filepath, threads, verbose, time.units = time.units)
 	}else{
 		experiment.data = NULL
 		experiment.info = NULL
@@ -247,6 +258,16 @@ read_experiment = function(filename, format = NA, interpolate = FALSE, project.d
 				url = ""
 			)
 		)
+		# Check experiment type consistency (mixing types is not allowed).
+		types = table(sapply(metrics, function(m) m$arena$type))
+		if(length(types) != 1){
+			stop(paste0(
+				"This experiment includes multiple experiment types. That is not supported, so please check your experiment definition and the arena definitions. ",
+				"The types '",
+				paste(names(types), collapse = "', '"),
+				"' were found. Each of these needs to be in its own experiment."
+			))
+		}
 		experiment = list(metrics = metrics, factors = factors, summary.variables = names(metrics[[1]]$summary), info = info)
 	}
 	
