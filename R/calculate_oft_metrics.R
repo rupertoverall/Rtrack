@@ -37,7 +37,7 @@ calculate_oft_metrics = function(path, arena){
 	turning = c(NA, NA, angle.from.xaxis[-1] - angle.from.xaxis[-length(angle.from.xaxis)])
 
 	# Speed in wall, corner, centre zones (total time using normalised units)
-	total.time =  diff(range(path$t, na.rm = T))
+	total.time = diff(range(path$t, na.rm = T))
 	intervals = diff(path$t)
 	negligible = intervals == 0 # This can happen due to rounding precision.
 	velocity = path.segment.lengths[!negligible] / intervals[!negligible]
@@ -147,27 +147,27 @@ calculate_oft_metrics = function(path, arena){
 			corner.zone.crossings = zone.crossings$corner
 		),
 		summary = c(
-			path.length = path.length * arena$correction$r,
-			total.time = total.time * arena$correction$t,
-			velocity = velocity.quantile[3] * arena$correction$r * arena$correction$t,
-			immobility = immobility * arena$correction$r * arena$correction$t,
+			path.length = path.length * arena$correction$r * arena$correction$d,
+			total.time = total.time,
+			velocity = velocity.quantile[3] * arena$correction$r * arena$correction$d / arena$correction$t,
+			immobility = immobility * arena$correction$t,
 			coverage = coverage,
-			distance.from.centre = d.centre.quantile[3] * arena$correction$r,
-			distance.from.wall = d.wall.quantile[3] * arena$correction$r,
-			distance.from.corner = d.corner.quantile[3] * arena$correction$r,
+			distance.from.centre = d.centre.quantile[3] * arena$correction$r * arena$correction$d,
+			distance.from.wall = d.wall.quantile[3] * arena$correction$r * arena$correction$d,
+			distance.from.corner = d.corner.quantile[3] * arena$correction$r * arena$correction$d,
 			roaming.entropy = roaming.entropy,
-			velocity.in.centre.zone = velocity.in.zone$centre * arena$correction$r * arena$correction$t,
-			velocity.in.wall.zone = velocity.in.zone$wall * arena$correction$r * arena$correction$t,
-			velocity.in.corner.zone = velocity.in.zone$corner * arena$correction$r * arena$correction$t,
+			velocity.in.centre.zone = velocity.in.zone$centre * arena$correction$r * arena$correction$d / arena$correction$t,
+			velocity.in.wall.zone = velocity.in.zone$wall * arena$correction$r * arena$correction$d / arena$correction$t,
+			velocity.in.corner.zone = velocity.in.zone$corner * arena$correction$r * arena$correction$d / arena$correction$t,
 			immobility.in.centre.zone = immobility.in.zone$centre * arena$correction$t,
 			immobility.in.wall.zone = immobility.in.zone$wall * arena$correction$t,
 			immobility.in.corner.zone = immobility.in.zone$corner * arena$correction$t,
 			latency.to.centre.zone = latency.to.zone$centre * arena$correction$t,
 			latency.to.wall.zone = latency.to.zone$wall * arena$correction$t,
 			latency.to.corner.zone = latency.to.zone$corner * arena$correction$t,
-			time.in.centre.zone = time.in.zone$centre * total.time * arena$correction$t,
-			time.in.wall.zone = time.in.zone$wall * total.time * arena$correction$t,
-			time.in.corner.zone = time.in.zone$corner * total.time * arena$correction$t,
+			time.in.centre.zone = time.in.zone$centre * total.time,
+			time.in.wall.zone = time.in.zone$wall * total.time,
+			time.in.corner.zone = time.in.zone$corner * total.time,
 			centre.zone.crossings = zone.crossings$centre,
 			wall.zone.crossings = zone.crossings$wall,
 			corner.zone.crossings = zone.crossings$corner
