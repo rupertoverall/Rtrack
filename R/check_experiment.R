@@ -320,6 +320,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 							}
 							#
 							zones.check = sapply(zones, function(zone){
+								bounds.check = FALSE
 								bounds = unlist(strsplit(description[[zone]], "\\s+"))
 								if(bounds[1] == "circle"){
 									bounds.check = tryCatch({
@@ -359,6 +360,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 							}
 							#
 							zones.check = sapply(zones, function(zone){
+								bounds.check = FALSE
 								bounds = unlist(strsplit(description[[zone]], "\\s+"))
 								if(bounds[1] == "circle"){
 									bounds.check = tryCatch({
@@ -390,6 +392,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 							}
 							#
 							zones.check = sapply(zones, function(zone){
+								bounds.check = FALSE
 								bounds = unlist(strsplit(description[[zone]], "\\s+"))
 								if(bounds[1] == "square"){
 									bounds.check = tryCatch({
@@ -429,6 +432,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 							}
 							#
 							zones.check = sapply(zones, function(zone){
+								bounds.check = FALSE
 								bounds = unlist(strsplit(description[[zone]], "\\s+"))
 								if(bounds[1] == "circle"){
 									bounds.check = tryCatch({
@@ -480,6 +484,7 @@ check_experiment = function(filename, format = NA, interpolate = FALSE, project.
 							}
 							#
 							zones.check = sapply(zones, function(zone){
+								bounds.check = FALSE
 								bounds = unlist(strsplit(description[[zone]], "\\s+"))
 								if(bounds[1] == "circle"){
 									bounds.check = tryCatch({
