@@ -1,30 +1,30 @@
 # 1. System requirements
 ## Operating system
 This package runs on any operating system with R (≥ version 3.5) installed. The package has been tested on the following systems:
-(Last updated for Rtrack version 2.0.3 on 2023-08-12 05:52:37 CEST).
+(Last updated for Rtrack version 2.0.4 on 2025-09-01 17:09:00 CEST).
 
 |Flavor|Version|Tinstall|Tcheck|Ttotal|Status|Flags|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-|r-devel-linux-x86_64-debian-clang | 2.0.2 | 66.45 | 325.82 | 392.27 | OK | 
-|r-devel-linux-x86_64-debian-gcc | 2.0.2 | 53.72 | 233.69 | 287.41 | OK | 
-|r-devel-linux-x86_64-fedora-clang | 2.0.2 | | | 413.22 | NOTE | 
-|r-devel-linux-x86_64-fedora-gcc | 2.0.2 | | | 483.95 | OK | 
-|r-devel-windows-x86_64 | 2.0.2 | 51.00 | 192.00 | 243.00 | NOTE | 
-|r-patched-linux-x86_64 | 1.0.7 | 32.85 | 294.04 | 326.89 | OK | 
-|r-release-linux-x86_64 | 1.0.7 | 30.43 | 290.66 | 321.09 | OK | 
-|r-release-macos-arm64 | 2.0.2 | | | 113.00 | NOTE | 
-|r-release-macos-x86_64 | 2.0.2 | | | 317.00 | NOTE | 
-|r-release-windows-x86_64 | 2.0.2 | 55.00 | 267.00 | 322.00 | NOTE | 
-|r-oldrel-macos-arm64 | 2.0.2 | | | 106.00 | NOTE | 
-|r-oldrel-macos-x86_64 | 1.0.7 | | | 123.00 | OK | 
-|r-oldrel-windows-x86_64 | 2.0.2 | 67.00 | 246.00 | 313.00 | NOTE | 
+r-devel-linux-x86_64-debian-clang | 2.0.4 | 66.58 | 271.97 | 338.55 | OK | | 
+r-devel-linux-x86_64-debian-gcc | 2.0.4 | 39.91 | 163.79 | 203.70 | OK | | 
+r-devel-linux-x86_64-fedora-clang | 2.0.4 | 		520.54 | OK | | 
+r-devel-linux-x86_64-fedora-gcc | 2.0.4 | 		503.29 | OK | | 
+r-devel-windows-x86_64 | 2.0.4 | 55.00 | 201.00 | 256.00 | OK | | 
+r-patched-linux-x86_64 | 2.0.4 | 59.77 | 250.97 | 310.74 | OK | | 
+r-release-linux-x86_64 | 2.0.4 | 58.67 | 252.14 | 310.81 | OK | | 
+r-release-macos-arm64 | 2.0.4 | 		112.00 | OK | | 
+r-release-macos-x86_64 | 2.0.4 | 		199.00 | OK | | 
+r-release-windows-x86_64 | 2.0.4 | 54.00 | 198.00 | 252.00 | OK | | 
+r-oldrel-macos-arm64 | 2.0.4 | 		120.00 | NOTE | | 
+r-oldrel-macos-x86_64 | 2.0.4 | 		235.00 | NOTE | | 
+r-oldrel-windows-x86_64 | 2.0.4 | 73.00 | 280.00 | 353.00 | NOTE | 
 
-(NOTEs indicate only that the installed size is 5.2 Mb due to the embedded strategy calling models. This is a bit larger than the 5 Mb package size limit preferred by CRAN. However, having the models embedded in the package simplifies installation.)
+(NOTEs indicate only that the installed size is 6.2 Mb due to the embedded strategy calling models. Although this is larger than the 5 Mb package size limit preferred by CRAN, having the models embedded in the package simplifies installation.)
 
 We can also confirm that the package runs on Linux ARM64 (we test on a Raspberry Pi 5 running Ubuntu 24.04.2 LTS).
  
 ## R dependencies
-Imports: 	crayon, graphics, grDevices, Hmisc, KernSmooth, methods, openxlsx, parallel, pbapply, randomForest, RCurl, readxl, rjson, scales, stats, stringi, terra, tools, utils, zip
+Imports: 	crayon, graphics, grDevices, Hmisc, KernSmooth, methods, openxlsx, parallel, pbapply, randomForest, readxl, rjson, scales, stats, stringi, terra, tools, utils, zip
 
 Suggests: 	knitr, rmarkdown
 
